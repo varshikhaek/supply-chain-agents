@@ -1,0 +1,1309 @@
+<title>Knows When Not to Act</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --paper:#F3F6F8; --surface:#FFFFFF; --surface-2:#F8FAFB;
+  --sea:#DCEAF1; --sea-deep:#CFE1EA; --land:#E9ECE6; --land-edge:#C7CFC3;
+  --ink:#13233A; --ink-2:#46566B; --ink-3:#6E7C8D; --line:#D6DEE5; --line-2:#E6ECF0;
+  --lot:#8A2C4F; --lot-tint:#F6E9EF;
+  --navy:#27407A; --navy-tint:#E8EDF7;
+  --ok:#1F7447; --ok-tint:#E4F2EA;
+  --warn:#A85A0C; --warn-tint:#FBEEDD;
+  --bad:#B3261E; --bad-tint:#FBE7E5;
+  --new:#6A3FA0; --new-tint:#F0EAF8;
+  --radius:10px;
+  --display:"Archivo","Arial Narrow",Arial,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{background:var(--paper)}
+body{color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.55;padding-inline:clamp(16px,3vw,40px);padding-block:0 48px}
+h1,h2,h3,h4{font-family:var(--display);font-stretch:85%;letter-spacing:-.01em;line-height:1.1;margin:0;text-wrap:balance;color:var(--ink)}
+p{margin:0}
+a{color:var(--navy)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--navy);outline-offset:2px;border-radius:6px}
+.wrap{max-width:1320px;margin-inline:auto}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+
+/* ---------- top bar ---------- */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);margin-inline:calc(-1*clamp(16px,3vw,40px));padding-inline:clamp(16px,3vw,40px)}
+.top .wrap{display:flex;align-items:center;gap:20px;min-height:56px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;font-stretch:80%;font-size:17px;text-decoration:none;color:var(--ink)}
+.brand svg{flex:none}
+.top nav{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
+.top nav a{font-size:13.5px;text-decoration:none;color:var(--ink-2);padding:6px 10px;border-radius:6px}
+.top nav a:hover{background:var(--navy-tint);color:var(--navy)}
+
+/* ---------- hero ---------- */
+.hero{padding-block:44px 22px;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:40px;align-items:end}
+.hero h1{font-size:clamp(34px,5.2vw,62px);font-weight:800;font-stretch:78%;line-height:.98}
+.hero h1 em{font-style:normal;color:var(--lot)}
+.hero .lede{font-size:17px;color:var(--ink-2);max-width:56ch}
+.hero .lede strong{color:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.chip{font-family:var(--mono);font-size:11.5px;padding:4px 9px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--ink-2)}
+
+/* ---------- simulator ---------- */
+.sim{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:grid;gap:14px;scroll-margin-top:70px}
+.sim-bar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+.scen{display:flex;flex-wrap:wrap;gap:6px}
+.scen button{border:1px solid var(--line);background:var(--surface-2);padding:8px 12px;border-radius:8px;cursor:pointer;font-size:13.5px;font-weight:500;display:flex;gap:8px;align-items:center}
+.scen button .dot{width:8px;height:8px;border-radius:50%;background:var(--ink-3)}
+.scen button[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.scen button[aria-pressed="true"] .dot{background:#fff}
+.scen button:hover:not([aria-pressed="true"]){border-color:var(--navy)}
+.ctrl{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--surface);padding:8px 12px;border-radius:8px;cursor:pointer;font-size:13.5px;font-weight:500;display:inline-flex;gap:6px;align-items:center}
+.btn:hover{border-color:var(--navy);color:var(--navy)}
+.btn.primary{background:var(--navy);border-color:var(--navy);color:#fff}
+.btn.primary:hover{background:#1d3266;color:#fff}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.speed{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.speed button{border:0;background:var(--surface);padding:8px 10px;font-family:var(--mono);font-size:12px;cursor:pointer}
+.speed button[aria-pressed="true"]{background:var(--navy-tint);color:var(--navy);font-weight:600}
+
+.sim-main{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:14px}
+.mapcard{position:relative;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--surface);align-self:start}
+.mapbox{position:relative;width:100%;aspect-ratio:16/10.2;max-width:100%}
+#map{position:absolute;inset:0;width:100%;height:100%;display:block}
+.map-hud{position:absolute;left:10px;top:10px;display:flex;gap:6px;flex-wrap:wrap;pointer-events:none}
+.hud{background:rgba(255,255,255,.92);border:1px solid var(--line);border-radius:7px;padding:5px 9px;font-size:12px;box-shadow:0 1px 2px rgba(19,35,58,.06)}
+.hud b{font-family:var(--mono);font-weight:500}
+.legend{position:absolute;right:10px;bottom:10px;background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:11.5px;display:grid;gap:3px;pointer-events:none}
+.legend span{display:flex;align-items:center;gap:7px}
+.legend i{display:inline-block;width:14px;height:8px;border-radius:2px}
+.now{border-top:1px solid var(--line);background:var(--surface);padding:12px 14px;display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:start;min-height:84px}
+.now .who{grid-row:span 2}
+.now h3{font-size:18px;font-weight:700}
+.now p{color:var(--ink-2);font-size:14px;max-width:95ch}
+
+.agent-chip{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;letter-spacing:.04em;text-transform:uppercase;padding:4px 8px;border-radius:6px;white-space:nowrap;font-weight:500}
+.c-sense{background:var(--navy-tint);color:var(--navy)}
+.c-plan{background:var(--navy-tint);color:var(--navy)}
+.c-red{background:var(--new-tint);color:var(--new)}
+.c-comp{background:#E9EEF1;color:#33475B}
+.c-gate{background:var(--ink);color:#fff}
+.c-route{background:var(--ok-tint);color:var(--ok)}
+.c-inv{background:var(--ok-tint);color:var(--ok)}
+.c-human{background:var(--warn-tint);color:var(--warn)}
+.c-trust{background:var(--new-tint);color:var(--new)}
+
+.side{display:grid;gap:14px;align-content:start}
+.card{border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);padding:14px}
+.card h4{font-size:15px;font-weight:700;margin-bottom:8px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.card h4 small{font-family:var(--mono);font-weight:400;font-size:11px;color:var(--ink-3);letter-spacing:.04em}
+
+/* viability clock */
+.viab{display:grid;grid-template-columns:118px 1fr;gap:12px;align-items:center}
+.viab svg{width:118px;height:118px}
+.viab dl{margin:0;display:grid;gap:6px;font-size:12.5px}
+.viab dt{color:var(--ink-3);font-size:11.5px}
+.viab dd{margin:0;font-family:var(--mono);font-size:13px}
+
+/* pipeline */
+.pipe{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.pipe li{display:grid;grid-template-columns:22px 1fr auto;gap:8px;align-items:center;padding:6px 8px;border-radius:7px;font-size:13px;border:1px solid transparent;transition:background .25s,border-color .25s}
+.pipe li .n{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-family:var(--mono);font-size:11px;background:var(--line-2);color:var(--ink-2)}
+.pipe li .nm{font-weight:500}
+.pipe li .nm small{display:block;color:var(--ink-3);font-weight:400;font-size:11.5px;line-height:1.3}
+.st{font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:5px;color:var(--ink-3);background:var(--line-2)}
+.pipe li.active{background:var(--navy-tint);border-color:#C7D3EA}
+.pipe li.active .n{background:var(--navy);color:#fff}
+.pipe li.done .n{background:var(--ok);color:#fff}
+.st.working{background:var(--navy);color:#fff}
+.st.done{background:var(--ok-tint);color:var(--ok)}
+.st.auto{background:var(--ok);color:#fff}
+.st.escalate{background:var(--warn);color:#fff}
+.st.blocked{background:var(--bad-tint);color:var(--bad)}
+.st.waiting{background:var(--warn-tint);color:var(--warn)}
+.st.idle{background:var(--line-2)}
+.st.skip{background:transparent;color:var(--ink-3);border:1px dashed var(--line)}
+.new-tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;padding:1px 5px;border-radius:4px;background:var(--new);color:#fff;margin-left:4px;vertical-align:1px}
+
+/* decision card */
+.decision{border:2px solid var(--warn);background:linear-gradient(0deg,var(--surface),var(--surface)) padding-box;border-radius:12px;padding:16px;display:grid;gap:12px;scroll-margin-top:80px}
+.decision-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;align-items:flex-start}
+.decision-head h3{font-size:22px}
+.decision-head p{color:var(--ink-2);max-width:80ch;margin-top:4px}
+.protect{display:flex;gap:8px;align-items:center;font-size:12.5px;background:var(--warn-tint);color:var(--warn);padding:6px 10px;border-radius:7px;font-weight:500}
+.pulse{width:8px;height:8px;border-radius:50%;background:var(--warn);animation:pulse 1.4s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(168,90,12,.5)}70%{box-shadow:0 0 0 8px rgba(168,90,12,0)}100%{box-shadow:0 0 0 0 rgba(168,90,12,0)}}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
+.opt{border:1px solid var(--line);border-radius:10px;padding:12px;display:grid;gap:8px;align-content:start;background:var(--surface)}
+.opt.rec{border-color:var(--ok);box-shadow:inset 0 0 0 1px var(--ok)}
+.opt h5{margin:0;font-family:var(--display);font-stretch:85%;font-size:16px;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.opt .rec-tag{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:var(--ok);color:#fff;padding:2px 6px;border-radius:4px;white-space:nowrap}
+.opt dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-size:12.5px}
+.opt dt{color:var(--ink-3)}
+.opt dd{margin:0;font-family:var(--mono);font-size:12.5px;text-align:right}
+.opt p{font-size:12.5px;color:var(--ink-2)}
+.opt .btn{justify-content:center}
+.decision-foot{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center;font-size:12.5px;color:var(--ink-3)}
+
+/* lower grid */
+.sim-lower{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,.8fr) minmax(0,1.05fr);gap:14px}
+.tbl-wrap{overflow-x:auto}
+table.optt{width:100%;border-collapse:collapse;font-size:12.5px;min-width:470px}
+.optt th{text-align:left;font-weight:500;color:var(--ink-3);font-size:11px;letter-spacing:.04em;text-transform:uppercase;padding:6px 6px;border-bottom:1px solid var(--line)}
+.optt td{padding:7px 6px;border-bottom:1px solid var(--line-2);vertical-align:top}
+.optt td.num{font-family:var(--mono);text-align:right;white-space:nowrap}
+.optt th.num{text-align:right}
+.optt tr.blocked td{color:var(--ink-3)}
+.optt tr.blocked td:first-child{text-decoration:line-through;text-decoration-color:var(--bad)}
+.optt tr.best td{background:var(--ok-tint)}
+.bar{height:6px;border-radius:3px;background:var(--line-2);overflow:hidden;min-width:48px;margin-top:4px}
+.bar i{display:block;height:100%;background:var(--navy)}
+.tag{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.04em;text-transform:uppercase;padding:1px 6px;border-radius:4px;white-space:nowrap}
+.tag.ok{background:var(--ok-tint);color:var(--ok)}
+.tag.bad{background:var(--bad-tint);color:var(--bad)}
+.tag.warn{background:var(--warn-tint);color:var(--warn)}
+.tag.nav{background:var(--navy-tint);color:var(--navy)}
+.empty{color:var(--ink-3);font-size:13px;padding:10px 0}
+
+.weights{display:grid;gap:7px;margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
+.weights label{display:grid;grid-template-columns:118px 1fr 34px;gap:8px;align-items:center;font-size:12.5px}
+.weights output{font-family:var(--mono);font-size:12px;text-align:right}
+input[type=range]{accent-color:var(--navy);width:100%}
+
+/* gate matrix */
+.gate{display:grid;grid-template-columns:18px 1fr;gap:6px}
+.gate .ylab{writing-mode:vertical-rl;transform:rotate(180deg);font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;color:var(--ink-3);text-align:center}
+.gm{position:relative;aspect-ratio:1/1;max-width:100%;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:3px}
+.gm .q{border-radius:6px;padding:6px;font-family:var(--mono);font-size:10px;letter-spacing:.05em;text-transform:uppercase;display:flex;align-items:flex-start}
+.q.esc{background:var(--warn-tint);color:var(--warn)}
+.q.auto{background:var(--ok-tint);color:var(--ok);border:1.5px solid var(--ok)}
+.q.bad{background:var(--bad-tint);color:var(--bad)}
+.gm .pt{position:absolute;width:24px;height:24px;margin:-12px 0 0 -12px;border-radius:50%;display:grid;place-items:center;font-family:var(--mono);font-size:11px;font-weight:500;color:#fff;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:left .6s,top .6s}
+.gate .xlab{grid-column:2;display:flex;justify-content:space-between;font-family:var(--mono);font-size:10.5px;color:var(--ink-3);letter-spacing:.06em}
+.gate-list{list-style:none;padding:0;margin:10px 0 0;display:grid;gap:5px;font-size:12.5px}
+.gate-list li{display:grid;grid-template-columns:20px 1fr auto;gap:8px;align-items:center}
+.gate-list .k{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-family:var(--mono);font-size:10.5px;color:#fff}
+.trust{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
+.trust .track{position:relative;height:10px;border-radius:5px;background:linear-gradient(90deg,var(--ok-tint),var(--warn-tint));border:1px solid var(--line)}
+.trust .knob{position:absolute;top:50%;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;background:var(--new);border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:left .8s}
+.trust .ends{display:flex;justify-content:space-between;font-size:11px;color:var(--ink-3);margin-top:4px}
+.trust p{font-size:12.5px;color:var(--ink-2);margin-top:6px}
+
+/* audit log */
+.log{list-style:none;margin:0;padding:0;display:grid;gap:8px;max-height:430px;overflow:auto;padding-right:4px}
+.log li{border:1px solid var(--line-2);border-radius:8px;padding:8px 10px;font-size:12.5px;background:var(--surface-2);animation:slide .35s ease-out}
+@keyframes slide{from{transform:translateY(-4px);opacity:.3}to{transform:none;opacity:1}}
+.log .lh{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:4px}
+.log .ts{font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+.log .act{font-weight:600}
+.log .why{color:var(--ink-2)}
+.log .src{font-family:var(--mono);font-size:11px;color:var(--ink-3);margin-top:3px}
+.log details{margin-top:4px}
+.log summary{cursor:pointer;color:var(--bad);font-size:12px;font-weight:500}
+.log details ul{margin:4px 0 0;padding-left:16px;color:var(--ink-2)}
+
+/* ---------- content sections ---------- */
+section.block{padding-block:56px 8px;scroll-margin-top:60px}
+.sec-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px;align-items:end;margin-bottom:24px}
+.sec-head h2{font-size:clamp(28px,3.6vw,42px);font-weight:800;font-stretch:80%}
+.sec-head p{color:var(--ink-2);max-width:62ch}
+.grid-4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;display:grid;gap:6px;align-content:start}
+.stat .big{font-family:var(--display);font-stretch:75%;font-weight:800;font-size:40px;line-height:1;color:var(--navy)}
+.stat .big.lot{color:var(--lot)}
+.stat h3{font-size:16px;font-weight:700}
+.stat p{font-size:13.5px;color:var(--ink-2)}
+.src-note{font-size:12px;color:var(--ink-3);margin-top:12px}
+.people{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.person{border-top:3px solid var(--ink);padding-top:12px;display:grid;gap:6px}
+.person.focus{border-top-color:var(--lot)}
+.person h3{font-size:17px}
+.person p{font-size:13.5px;color:var(--ink-2)}
+.person .tag{justify-self:start}
+
+.agents{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.agent{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;display:grid;gap:10px;align-content:start}
+.agent header{display:flex;gap:10px;align-items:center}
+.agent .num{width:30px;height:30px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font-family:var(--mono);font-size:13px;flex:none}
+.agent.is-new .num{background:var(--new)}
+.agent.is-human .num{background:var(--warn)}
+.agent h3{font-size:18px}
+.agent p{font-size:13.5px;color:var(--ink-2)}
+.agent dl{margin:0;display:grid;gap:6px;font-size:13px}
+.agent dt{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.agent dd{margin:0}
+.agent .sap{font-size:12px;color:var(--navy);background:var(--navy-tint);padding:5px 8px;border-radius:6px}
+
+.gate-explain{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:24px;align-items:start}
+.big-matrix{display:grid;grid-template-columns:28px 1fr;gap:8px}
+.big-matrix .gm{gap:6px}
+.big-matrix .q{font-size:12px;padding:12px;flex-direction:column;gap:6px;text-transform:none;letter-spacing:0;font-family:var(--body)}
+.big-matrix .q b{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase}
+.big-matrix .q span{color:var(--ink-2);font-size:12.5px}
+.rules{display:grid;gap:10px}
+.rule{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;display:grid;grid-template-columns:auto 1fr;gap:4px 12px}
+.rule .ic{grid-row:span 2;width:34px;height:34px;border-radius:8px;display:grid;place-items:center}
+.rule h3{font-size:16px}
+.rule p{font-size:13.5px;color:var(--ink-2)}
+
+.compare{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface)}
+.compare table{width:100%;border-collapse:collapse;min-width:680px;font-size:14px}
+.compare th,.compare td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line-2);vertical-align:top}
+.compare thead th{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);font-weight:500;background:var(--surface-2)}
+.compare td:first-child{font-weight:600;white-space:nowrap}
+.compare td:nth-child(2){color:var(--ink-3)}
+.compare td:nth-child(3){color:var(--ink)}
+.compare tr:last-child td{border-bottom:0}
+
+.arch{display:grid;gap:8px}
+.layer{display:grid;grid-template-columns:150px 1fr;gap:8px}
+.layer .ln{background:var(--ink);color:#fff;border-radius:8px;padding:10px 12px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;display:flex;align-items:center}
+.layer .cells{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px}
+.cell{border:1.5px solid var(--navy);background:var(--navy-tint);border-radius:8px;padding:9px 11px;font-size:13px}
+.cell b{display:block;color:var(--navy);font-weight:600}
+.cell span{color:var(--ink-2);font-size:12px}
+.cell.road{background:var(--surface);border-style:dashed}
+.arch-legend{display:flex;flex-wrap:wrap;gap:16px;font-size:12.5px;color:var(--ink-2);margin-top:10px}
+.arch-legend i{display:inline-block;width:18px;height:12px;border-radius:3px;vertical-align:-2px;margin-right:6px}
+
+.qa{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.qa details{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:12px 16px}
+.qa summary{cursor:pointer;font-weight:600;font-size:15px;list-style:none;display:flex;justify-content:space-between;gap:12px}
+.qa summary::after{content:"+";font-family:var(--mono);color:var(--ink-3)}
+.qa details[open] summary::after{content:"–"}
+.qa details p{margin-top:8px;color:var(--ink-2);font-size:14px}
+.qa .where{font-family:var(--mono);font-size:11px;color:var(--ok);margin-top:6px}
+
+.road-map{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;counter-reset:ph}
+.phase{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;display:grid;gap:8px;align-content:start}
+.phase.now-ph{border-color:var(--lot);box-shadow:inset 0 0 0 1px var(--lot)}
+.phase h3{font-size:18px}
+.phase ul{margin:0;padding-left:18px;font-size:13.5px;color:var(--ink-2);display:grid;gap:4px}
+.kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:14px}
+.kpi{border-left:3px solid var(--navy);padding:4px 0 4px 12px}
+.kpi b{display:block;font-family:var(--display);font-stretch:80%;font-size:20px}
+.kpi span{font-size:12.5px;color:var(--ink-2)}
+
+footer.foot{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;font-size:12.5px;color:var(--ink-3)}
+
+/* ---------- responsive ---------- */
+@media (max-width:1100px){
+  .sim-main{grid-template-columns:1fr}
+  .side{grid-template-columns:1fr 1fr}
+  .sim-lower{grid-template-columns:1fr 1fr}
+  .sim-lower > :first-child{grid-column:1/-1}
+  .grid-4,.people,.road-map{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media (max-width:760px){
+  .hero,.sec-head,.gate-explain{grid-template-columns:1fr}
+  .hero{gap:16px;padding-block:28px 16px}
+  .side,.sim-lower,.grid-3,.grid-2,.qa{grid-template-columns:1fr}
+  .top nav{display:none}
+  .layer{grid-template-columns:1fr}
+  .legend{display:none}
+  .mapbox{aspect-ratio:1/1.08}
+  .hide-sm{display:none}
+  .hud{font-size:11px;padding:4px 7px}
+  .now{grid-template-columns:1fr}
+  .now .who{grid-row:auto}
+  .scen{display:grid;grid-template-columns:1fr 1fr;width:100%}
+  .scen button{font-size:12.5px;padding:8px 9px}
+  .kpis{grid-template-columns:1fr 1fr}
+  .sim{padding:10px}
+}
+@media (max-width:460px){
+  .grid-4,.people,.road-map{grid-template-columns:1fr}
+  .viab{grid-template-columns:96px 1fr}
+  .viab svg{width:96px;height:96px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
+</style>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#sim">
+      <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="12" fill="#13233A"/><path d="M6 15.5h14l-2.4 3.5H8.6z" fill="#fff"/><rect x="9" y="11" width="3.2" height="3.6" fill="#8A2C4F"/><rect x="12.6" y="11" width="3.2" height="3.6" fill="#DCEAF1"/><rect x="12.6" y="7.2" width="3.2" height="3.4" fill="#fff"/></svg>
+      Agentic Supply Chain Resilience
+    </a>
+    <nav aria-label="Sections">
+      <a href="#sim">Live simulation</a>
+      <a href="#why">Why now</a>
+      <a href="#agents">Agents</a>
+      <a href="#gate">Decision gate</a>
+      <a href="#different">What's new</a>
+      <a href="#sap">SAP stack</a>
+      <a href="#questions">Questions</a>
+      <a href="#roadmap">Roadmap</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <div>
+      <p class="eyebrow">SAP Hackfest 2026 · Theme 1 · What an agentic solution looks like</p>
+      <h1 style="margin-top:12px">When the world fractures, supply chains must <em>think for themselves</em>, and know when not to act.</h1>
+    </div>
+    <div>
+      <p class="lede">Follow one vaccine consignment, <strong>Lot VX-2291 (1.2 million doses, Antwerp to Nairobi)</strong>, through four disruptions from the brief. Watch seven agents sense, plan, challenge and act on their own when it is safe, stop and hand the call to a person when it is not, and log every choice with the options they rejected.</p>
+      <div class="chips">
+        <span class="chip">Pharma cold chain · East Africa</span>
+        <span class="chip">7 agents + human-in-the-loop</span>
+        <span class="chip">Confidence × reversibility gate</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SIMULATOR ================= -->
+  <section class="sim" id="sim" aria-label="Live multi-agent simulation">
+    <div class="sim-bar">
+      <div class="scen" role="group" aria-label="Choose a disruption">
+        <button id="sc-redsea" data-s="redsea" aria-pressed="true"><span class="dot"></span>Red Sea closure</button>
+        <button id="sc-hormuz" data-s="hormuz" aria-pressed="false"><span class="dot"></span>Strait of Hormuz closed</button>
+        <button id="sc-tariff" data-s="tariff" aria-pressed="false"><span class="dot"></span>Tariff spike to 50%</button>
+        <button id="sc-spoof" data-s="spoof" aria-pressed="false"><span class="dot"></span>Spoofed port alert</button>
+      </div>
+      <div class="ctrl">
+        <button class="btn primary" id="btn-play" type="button">Pause</button>
+        <button class="btn" id="btn-next" type="button">Next step →</button>
+        <button class="btn" id="btn-reset" type="button">Restart</button>
+        <div class="speed" role="group" aria-label="Playback speed">
+          <button id="sp-1" data-v="1" aria-pressed="true">1×</button>
+          <button id="sp-2" data-v="2" aria-pressed="false">2×</button>
+          <button id="sp-4" data-v="4" aria-pressed="false">4×</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="sim-main">
+      <div class="mapcard">
+        <div class="mapbox">
+          <canvas id="map" aria-label="Animated map of shipping lanes from Europe and Asia to East Africa"></canvas>
+          <div class="map-hud">
+            <div class="hud">Sim clock <b id="clock">D+0 · 06:00</b></div>
+            <div class="hud hide-sm">Scenario <b id="hud-scen">Red Sea closure</b></div>
+            <div class="hud" id="hud-step">Step <b>0 / 0</b></div>
+          </div>
+          <div class="legend" aria-hidden="true">
+            <span><i style="background:#8A2C4F"></i>Lot VX-2291 (our vaccines)</span>
+            <span><i style="background:#27407A"></i>Other container ships</span>
+            <span><i style="background:#9AA6B2"></i>Anchored / waiting</span>
+            <span><i style="background:#1F7447"></i>Reefer trucks and replacement supply</span>
+            <span><i style="background:repeating-linear-gradient(45deg,#B3261E 0 3px,#FBE7E5 3px 6px)"></i>Closed or disputed zone</span>
+          </div>
+        </div>
+        <div class="now" aria-live="polite">
+          <div class="who" id="now-who"><span class="agent-chip c-sense">Sensing</span></div>
+          <h3 id="now-title">Monitoring the corridor</h3>
+          <p id="now-text">142 live signals: maritime security advisories, weather, tariff feeds, port congestion and AIS vessel positions.</p>
+        </div>
+      </div>
+
+      <div class="side">
+        <div class="card">
+          <h4>Viability Clock <small>LOT VX-2291</small></h4>
+          <div class="viab">
+            <svg viewBox="0 0 120 120" aria-hidden="true">
+              <circle cx="60" cy="60" r="50" fill="none" stroke="#E6ECF0" stroke-width="12"/>
+              <circle id="v-eta" cx="60" cy="60" r="50" fill="none" stroke="#B3261E" stroke-opacity=".25" stroke-width="12" stroke-dasharray="0 400" transform="rotate(-90 60 60)"/>
+              <circle id="v-arc" cx="60" cy="60" r="50" fill="none" stroke="#1F7447" stroke-width="12" stroke-linecap="round" stroke-dasharray="0 400" transform="rotate(-90 60 60)"/>
+              <text id="v-days" x="60" y="60" text-anchor="middle" font-family="Archivo, Arial" font-weight="800" font-size="28" fill="#13233A">12.0</text>
+              <text x="60" y="78" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#6E7C8D">DAYS LEFT</text>
+            </svg>
+            <dl>
+              <div><dt>Qualified cold-chain window</dt><dd id="v-win">12.0 days</dd></div>
+              <div><dt>Current plan arrives in</dt><dd id="v-plan">6.0 days</dd></div>
+              <div><dt>Status</dt><dd id="v-status"><span class="tag ok">Inside window</span></dd></div>
+            </dl>
+          </div>
+        </div>
+        <div class="card">
+          <h4>Agent pipeline <small>ROLE · STATUS</small></h4>
+          <ol class="pipe" id="pipe"></ol>
+        </div>
+      </div>
+    </div>
+
+    <div class="decision" id="decision" hidden>
+      <div class="decision-head">
+        <div>
+          <span class="agent-chip c-human">Human-in-the-loop · Decision Card</span>
+          <h3 id="dc-title" style="margin-top:8px">A decision needs you</h3>
+          <p id="dc-text"></p>
+        </div>
+        <div class="protect" id="dc-protect"><span class="pulse"></span><span id="dc-protect-text">Hold-and-protect is running while you decide</span></div>
+      </div>
+      <div class="opts" id="dc-opts"></div>
+      <div class="decision-foot">
+        <span>Move the priority weights under Scenario Planning and the recommendation updates live.</span>
+        <button class="btn" id="dc-more" type="button">Ask the agents for more options</button>
+      </div>
+    </div>
+
+    <div class="sim-lower">
+      <div class="card">
+        <h4>Scenario Planning <small id="opt-sub">WHAT-IF OPTIONS</small></h4>
+        <div id="opt-area"><p class="empty">Options appear here once a disruption is classified.</p></div>
+        <div class="weights" id="weights">
+          <div class="eyebrow">Priority weights (adjust live)</div>
+          <label for="w-time">Time to clinics<input type="range" id="w-time" min="0" max="10" value="7"><output id="o-time">7</output></label>
+          <label for="w-cost">Cost<input type="range" id="w-cost" min="0" max="10" value="4"><output id="o-cost">4</output></label>
+          <label for="w-integ">Product integrity<input type="range" id="w-integ" min="0" max="10" value="9"><output id="o-integ">9</output></label>
+          <label for="w-risk">Security / compliance risk<input type="range" id="w-risk" min="0" max="10" value="6"><output id="o-risk">6</output></label>
+          <label for="w-equity">Clinical equity<input type="range" id="w-equity" min="0" max="10" value="5"><output id="o-equity">5</output></label>
+        </div>
+      </div>
+      <div class="card">
+        <h4>Decision Gate <small>CONFIDENCE × REVERSIBILITY</small></h4>
+        <div class="gate">
+          <div class="ylab">CONFIDENCE ↑</div>
+          <div class="gm" id="gm">
+            <div class="q esc">Escalate</div>
+            <div class="q auto">Autonomous</div>
+            <div class="q bad">Escalate</div>
+            <div class="q esc">Escalate</div>
+          </div>
+          <div class="xlab"><span>IRREVERSIBLE</span><span>REVERSIBLE →</span></div>
+        </div>
+        <ul class="gate-list" id="gate-list"></ul>
+        <div class="trust">
+          <div class="eyebrow">Trust Calibration · autonomy threshold</div>
+          <div class="track" style="margin-top:8px"><div class="knob" id="t-knob" style="left:40%"></div></div>
+          <div class="ends"><span>More autonomy</span><span id="t-val" class="mono">threshold 0.80</span><span>More escalation</span></div>
+          <p id="t-text">Autonomous actions need confidence ≥ 0.80. The agent moves this after comparing predictions with real outcomes.</p>
+        </div>
+      </div>
+      <div class="card">
+        <h4>Counterfactual audit log <small id="log-count">0 ENTRIES</small></h4>
+        <ol class="log" id="log"></ol>
+      </div>
+    </div>
+  </section>
+  <!-- ================= WHY NOW ================= -->
+  <section class="block" id="why">
+    <div class="sec-head">
+      <div><p class="eyebrow">Why this matters now</p><h2 style="margin-top:8px">Disruption is no longer episodic. It is structural.</h2></div>
+      <p>Supply chains built only for cost cannot absorb shocks that now arrive every few weeks. They must sense, adapt and recover on their own, at speed. That is the job agentic AI is built for.</p>
+    </div>
+    <div class="grid-4">
+      <div class="stat"><span class="big">18.7%</span><h3>Red Sea and Hormuz</h3><p>Share of east-west shipments still transiting Suez, against 80% before the crisis. Rerouting via the Cape adds about 6,000 nautical miles and two to three weeks per voyage.</p></div>
+      <div class="stat"><span class="big">20–32%</span><h3>Tariff volatility</h3><p>Tariffs on China, 18% on India and 25% on countries doing business with Iran. A February 2026 Supreme Court ruling added more uncertainty, so tariff what-ifs must sit inside core planning.</p></div>
+      <div class="stat"><span class="big">Fragmented</span><h3>Geopolitics</h3><p>Russia–Ukraine, US–China chip restrictions and shifting trade blocs push networks from cost-optimised and global to regional and resilience-first.</p></div>
+      <div class="stat"><span class="big">Stacked</span><h3>Climate and infrastructure</h3><p>Extreme weather, Panama Canal drought limits, port congestion and labour strikes compound geopolitical risk, beyond what traditional planning tools were built for.</p></div>
+    </div>
+    <p class="src-note">Figures as stated in the SAP Hackfest 2026 Theme 1 problem statement.</p>
+
+    <div class="sec-head" style="margin-top:44px">
+      <div><p class="eyebrow">Who gets hurt</p><h2 style="margin-top:8px">When supply chains break, the most vulnerable pay first.</h2></div>
+      <p>We chose the medicine case because it turns time into a hard limit: a cold-chain break does not just raise cost, it makes vaccines unusable. The same agents carry over to the other three cases.</p>
+    </div>
+    <div class="people">
+      <div class="person focus"><span class="tag bad">Our focus</span><h3>Medicine access</h3><p>Last-mile pharma delivery in under-served regions cannot absorb two-to-three-week delays. Nurses, clinic staff and children waiting for doses feel it first.</p></div>
+      <div class="person"><span class="tag nav">Domain pack 2</span><h3>Food security</h3><p>Kenya and other food-importing nations pay more or switch grain suppliers at a premium when Red Sea routes close.</p></div>
+      <div class="person"><span class="tag nav">Domain pack 3</span><h3>Disaster relief</h3><p>Relief supply lines must form in hours. The same rerouting agents can coordinate humanitarian logistics.</p></div>
+      <div class="person"><span class="tag nav">Domain pack 4</span><h3>Smallholder livelihoods</h3><p>A tariff or route change a multinational barely notices can wipe out a farmer's season if no other buyer can be found.</p></div>
+    </div>
+  </section>
+
+  <!-- ================= AGENTS ================= -->
+  <section class="block" id="agents">
+    <div class="sec-head">
+      <div><p class="eyebrow">The system</p><h2 style="margin-top:8px">Seven agents, one rule: autonomy is earned, not assumed.</h2></div>
+      <p>Each agent has one clear role, a boundary it cannot cross and an explicit handoff to a person. The five agents from the brief are joined by two new ones: a Red-Team Agent and a Trust Calibration Agent.</p>
+    </div>
+    <div class="agents">
+      <article class="agent"><header><span class="num">1</span><h3>Disruption Sensing</h3></header><p>Monitors maritime security alerts, weather, tariff announcements, port congestion, AIS positions and news. Classifies each event by severity and supply-chain impact.</p><dl><div><dt>Acts alone when</dt><dd>Several independent sources agree (credibility ≥ 0.7).</dd></div><div><dt>Hands off when</dt><dd>A signal is ambiguous, single-sourced or contradicts vessel data.</dd></div></dl><span class="sap">SAP Integration Suite · Advanced Event Mesh · AI Core</span></article>
+      <article class="agent"><header><span class="num">2</span><h3>Scenario Planning</h3></header><p>Runs what-ifs: Suez closes, tariffs hit 50%, a key supplier goes offline. Scores rerouting, sourcing and inventory options on time, cost, integrity, risk and equity.</p><dl><div><dt>Hard constraint</dt><dd>Any option that outlasts the Viability Clock is blocked, whatever it costs.</dd></div><div><dt>Hands off</dt><dd>Ranked options with trade-offs, never a single answer without alternatives.</dd></div></dl><span class="sap">SAP Integrated Business Planning · HANA Cloud</span></article>
+      <article class="agent is-new"><header><span class="num">3</span><h3>Red-Team <span class="new-tag">NEW</span></h3></header><p>Tries to break every plan before it runs. Is the signal spoofed? What if the alternate port also closes? Does the backup route cross a new risk zone?</p><dl><div><dt>Power</dt><dd>Can lower an option's confidence below the autonomy threshold.</dd></div><div><dt>Why it matters</dt><dd>Stops the system confidently doing the wrong thing.</dd></div></dl><span class="sap">SAP AI Core · Generative AI Hub</span></article>
+      <article class="agent"><header><span class="num">4</span><h3>Rerouting &amp; Logistics</h3></header><p>Executes the chosen response: adjusts routes, rebalances freight across carriers, updates delivery times and tells downstream partners.</p><dl><div><dt>Fail-safe</dt><dd>If the transport system is unreachable it escalates, never guesses.</dd></div><div><dt>Hold-and-protect</dt><dd>While a human decides, it makes reversible bookings so time is not lost.</dd></div></dl><span class="sap">SAP Transportation Management · Business Network</span></article>
+      <article class="agent"><header><span class="num">5</span><h3>Inventory Rebalancing</h3></header><p>Recalculates safety stock, moves stock between depots and triggers procurement from alternate suppliers within budget and policy guardrails.</p><dl><div><dt>Guardrail</dt><dd>Never drains a depot below 30% safety stock without approval.</dd></div><div><dt>Equity</dt><dd>Clinical Priority Index sends scarce doses to outbreak zones first.</dd></div></dl><span class="sap">SAP IBP · S/4HANA · Ariba</span></article>
+      <article class="agent"><header><span class="num">6</span><h3>Compliance &amp; Audit</h3></header><p>Checks sanctions, trade rules, cold-chain (GDP) rules and import permits. Logs every decision with rationale, timestamps, sources and rejected alternatives.</p><dl><div><dt>Power</dt><dd>Hard veto over Logistics and Inventory, whatever the savings.</dd></div><div><dt>Output</dt><dd>Audit-ready report on demand.</dd></div></dl><span class="sap">SAP Audit Log · Advanced Track &amp; Trace</span></article>
+      <article class="agent is-new"><header><span class="num">7</span><h3>Trust Calibration <span class="new-tag">NEW</span></h3></header><p>Compares what the agents predicted with what actually happened. After misses it tightens the autonomy threshold so more cases go to people, and loosens it only when trust is re-earned.</p><dl><div><dt>Watches</dt><dd>ETA error, cost error, false autonomous actions.</dd></div><div><dt>Effect</dt><dd>The autonomy level is measured, not fixed.</dd></div></dl><span class="sap">SAP Analytics Cloud · HANA Cloud</span></article>
+      <article class="agent is-human"><header><span class="num">H</span><h3>Human-in-the-loop</h3></header><p>For high-value or irreversible decisions (switching a primary supplier, a route with elevated security risk, exceeding a cost threshold) the system pauses and shows a Decision Card.</p><dl><div><dt>Decision Card</dt><dd>Options, trade-offs, adjustable weights and a recommendation.</dd></div><div><dt>Reach</dt><dd>Web, Joule, or SMS and USSD for clinic staff offline.</dd></div></dl><span class="sap">SAP Build Process Automation · Joule</span></article>
+    </div>
+  </section>
+
+  <!-- ================= GATE ================= -->
+  <section class="block" id="gate">
+    <div class="sec-head">
+      <div><p class="eyebrow">The judgment core</p><h2 style="margin-top:8px">Two questions decide who acts: how sure are we, and can we undo it?</h2></div>
+      <p>Most systems escalate on severity alone. Ours plots every proposed action on confidence and reversibility. Only confident, undoable actions run by themselves.</p>
+    </div>
+    <div class="gate-explain">
+      <div class="big-matrix">
+        <div class="ylab" style="writing-mode:vertical-rl;transform:rotate(180deg);font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--ink-3);text-align:center">CONFIDENCE ↑</div>
+        <div>
+          <div class="gm" style="aspect-ratio:1.25/1">
+            <div class="q esc"><b>Escalate</b><span>Confident but irreversible. Example: switch the primary supplier.</span></div>
+            <div class="q auto"><b>Autonomous</b><span>Confident and undoable. Example: re-book a reefer truck, bridge stock from a nearby depot.</span></div>
+            <div class="q bad"><b>Escalate + verify</b><span>Unsure and irreversible. Example: act on a spoofed alert with a costly diversion.</span></div>
+            <div class="q esc"><b>Escalate</b><span>Unsure but undoable. Example: gather more data, then hold and protect.</span></div>
+          </div>
+          <div class="xlab" style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--ink-3);letter-spacing:.08em;margin-top:6px"><span>IRREVERSIBLE</span><span>REVERSIBLE →</span></div>
+        </div>
+      </div>
+      <div class="rules">
+        <div class="rule"><div class="ic" style="background:var(--bad-tint)"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="7" fill="none" stroke="#B3261E" stroke-width="2"/><path d="M9 5v4.5l3 2" stroke="#B3261E" stroke-width="2" fill="none" stroke-linecap="round"/></svg></div><h3>Viability Clock override</h3><p>If the remaining cold-chain window is shorter than the expected human response time, the system first takes the safest reversible step, then escalates.</p></div>
+        <div class="rule"><div class="ic" style="background:var(--warn-tint)"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><rect x="3" y="7" width="12" height="8" rx="2" fill="none" stroke="#A85A0C" stroke-width="2"/><path d="M6 7V5a3 3 0 0 1 6 0v2" stroke="#A85A0C" stroke-width="2" fill="none"/></svg></div><h3>Hold-and-protect, never idle</h3><p>While a person decides, agents pre-book cold rooms and reserve capacity with cancellable bookings, so waiting costs nothing irreversible.</p></div>
+        <div class="rule"><div class="ic" style="background:var(--new-tint)"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 12a7 7 0 0 1 14 0" stroke="#6A3FA0" stroke-width="2" fill="none"/><path d="M9 12l3-4" stroke="#6A3FA0" stroke-width="2" stroke-linecap="round"/></svg></div><h3>The threshold moves with evidence</h3><p>The Trust Calibration Agent raises the bar after a prediction miss and lowers it only after a run of accurate calls.</p></div>
+        <div class="rule"><div class="ic" style="background:#E9EEF1"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M4 3h10v12H4z" fill="none" stroke="#33475B" stroke-width="2"/><path d="M7 7h4M7 10h4" stroke="#33475B" stroke-width="2"/></svg></div><h3>Compliance can always say no</h3><p>A veto from the Compliance Agent overrides any saving. Conflicts between agents are settled by rule, not by negotiation.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= DIFFERENT ================= -->
+  <section class="block" id="different">
+    <div class="sec-head">
+      <div><p class="eyebrow">Innovation and differentiation</p><h2 style="margin-top:8px">Everyone will draw the same five boxes. The difference is judgment.</h2></div>
+      <p>Six additions that answer real failure modes of a vaccine cold chain, each buildable on SAP BTP.</p>
+    </div>
+    <div class="grid-3">
+      <div class="stat"><span class="big lot">01</span><h3>Viability Clock</h3><p>Every consignment carries a digital-twin cold-chain window. Each route option burns it down; no plan may spend more than is left.</p></div>
+      <div class="stat"><span class="big lot">02</span><h3>Red-Team pre-mortem</h3><p>An adversarial agent attacks each plan first and lowers confidence when it finds a weak point.</p></div>
+      <div class="stat"><span class="big lot">03</span><h3>Hold-and-protect</h3><p>Reversible bookings keep options open while a person decides. The system never sits idle.</p></div>
+      <div class="stat"><span class="big lot">04</span><h3>Last-mile human mesh</h3><p>Clinic staff and drivers report and approve by SMS, USSD or WhatsApp, offline-first. People act as sensors as well as approvers.</p></div>
+      <div class="stat"><span class="big lot">05</span><h3>Equity-weighted allocation</h3><p>A Clinical Priority Index sends scarce doses to outbreak zones and clinics with working fridges, not just the cheapest lane.</p></div>
+      <div class="stat"><span class="big lot">06</span><h3>Disruption memory</h3><p>Past disruptions and their outcomes become searchable playbooks, so each first response is better than the last.</p></div>
+    </div>
+    <div class="compare" style="margin-top:16px">
+      <table>
+        <thead><tr><th>Dimension</th><th>Typical approach</th><th>Our approach</th></tr></thead>
+        <tbody>
+          <tr><td>Agents</td><td>Five boxes in a straight line</td><td>Seven agents, adding Red-Team and Trust Calibration</td></tr>
+          <tr><td>Escalation</td><td>Fixed severity threshold</td><td>Confidence × reversibility gate that tightens itself after misses</td></tr>
+          <tr><td>Time</td><td>Delay is a cost input</td><td>Viability Clock: the remaining cold-chain window is a hard limit</td></tr>
+          <tr><td>Data trust</td><td>All feeds treated equally</td><td>Source-credibility scoring, proven live with a spoofed alert</td></tr>
+          <tr><td>Audit</td><td>A list of actions taken</td><td>Every decision, its rationale, its sources and the options rejected</td></tr>
+          <tr><td>Human role</td><td>Approve or reject a bare alert</td><td>Decision Card with live weights and an interim safe action</td></tr>
+          <tr><td>Objective</td><td>Cost and time</td><td>Time, cost, product integrity, security risk and clinical equity</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ================= SAP ================= -->
+  <section class="block" id="sap">
+    <div class="sec-head">
+      <div><p class="eyebrow">SAP technology and architecture</p><h2 style="margin-top:8px">Built where SAP customers already run their supply chains.</h2></div>
+      <p>Agents and apps run on SAP Business Technology Platform and act through the systems named in the brief: IBP for planning, Transportation Management for freight, Ariba and Business Network for suppliers, and Joule as the conversational front door.</p>
+    </div>
+    <div class="arch">
+      <div class="layer"><div class="ln">Experience</div><div class="cells"><div class="cell"><b>SAP Build Apps</b><span>Decision Card and corridor view</span></div><div class="cell"><b>Joule</b><span>Ask "why did you reroute?" in plain words</span></div><div class="cell road"><b>SAP Analytics Cloud</b><span>Viability twin dashboard</span></div><div class="cell road"><b>SMS / USSD gateway</b><span>Offline clinic approvals</span></div></div></div>
+      <div class="layer"><div class="ln">Governance</div><div class="cells"><div class="cell"><b>SAP Build Process Automation</b><span>Approval workflows, human handoff</span></div><div class="cell"><b>SAP Audit Log + Cloud Identity</b><span>Who approved what, and why</span></div><div class="cell road"><b>Advanced Track &amp; Trace for Pharma</b><span>Serialisation and batch compliance</span></div></div></div>
+      <div class="layer"><div class="ln">Intelligence</div><div class="cells"><div class="cell"><b>SAP AI Core + Generative AI Hub</b><span>Agent reasoning and Red-Team prompts</span></div><div class="cell"><b>SAP HANA Cloud vector engine</b><span>Disruption memory playbooks</span></div><div class="cell road"><b>HANA graph + time series</b><span>Route network and cold-chain telemetry</span></div></div></div>
+      <div class="layer"><div class="ln">Integration</div><div class="cells"><div class="cell"><b>SAP Integration Suite</b><span>APIs and adapters to feeds and carriers</span></div><div class="cell"><b>SAP Advanced Event Mesh</b><span>Real-time signal stream to agents</span></div><div class="cell"><b>RSS and API feeds</b><span>Advisories, weather, tariffs, AIS</span></div></div></div>
+      <div class="layer"><div class="ln">Systems of record</div><div class="cells"><div class="cell road"><b>SAP Integrated Business Planning</b><span>Demand sensing, inventory optimisation</span></div><div class="cell road"><b>SAP Transportation Management</b><span>Freight, carriers, route execution</span></div><div class="cell road"><b>SAP Ariba + Business Network</b><span>Alternate suppliers, multi-tier visibility</span></div><div class="cell road"><b>Joule supply chain agents</b><span>Hand off to Order Reliability Agent when available</span></div></div></div>
+    </div>
+    <div class="arch-legend"><span><i style="background:var(--navy-tint);border:1.5px solid var(--navy)"></i>In the Round 2 prototype</span><span><i style="background:#fff;border:1.5px dashed var(--navy)"></i>Pilot integration (simulated in the prototype)</span></div>
+  </section>
+
+  <!-- ================= QUESTIONS ================= -->
+  <section class="block" id="questions">
+    <div class="sec-head">
+      <div><p class="eyebrow">Robustness</p><h2 style="margin-top:8px">The questions judges will ask, answered in the design.</h2></div>
+      <p>Each answer is either shown in the simulation above or built into the rules the agents follow.</p>
+    </div>
+    <div class="qa">
+      <details open><summary>What stops the agent confidently doing the wrong thing?</summary><p>The confidence × reversibility gate plus the Red-Team pre-mortem. Irreversible actions always go to a person, however confident the model is.</p><p class="where">Shown in: Red Sea closure, step 5</p></details>
+      <details><summary>What if a signal is fake or wrong?</summary><p>Every source gets a credibility score. A single low-credibility source can never cross the autonomy threshold, and signals that contradict vessel data are quarantined.</p><p class="where">Shown in: Spoofed port alert</p></details>
+      <details><summary>What if two agents disagree?</summary><p>An explicit rule settles it: Compliance holds a hard veto over Logistics and Inventory, whatever the savings.</p><p class="where">Shown in: audit log, Compliance entries</p></details>
+      <details><summary>What if SAP TM or a carrier system is down?</summary><p>Unreachable integrations always escalate to a person. The agent never assumes a booking went through.</p><p class="where">Built into the Rerouting &amp; Logistics Agent</p></details>
+      <details><summary>What if autonomy quietly gets worse over time?</summary><p>The Trust Calibration Agent compares predicted and actual outcomes and tightens the threshold on drift.</p><p class="where">Shown in: the threshold slider after each run</p></details>
+      <details><summary>Who is accountable for an autonomous call?</summary><p>The audit log records the action, rationale, sources, timestamp and every rejected alternative, so each call can be defended.</p><p class="where">Shown in: counterfactual audit log</p></details>
+      <details><summary>Does cost dominate every answer?</summary><p>No. Five weights (time, cost, integrity, risk, equity) are visible and adjustable. Options that break the cold-chain window are blocked regardless of cost.</p><p class="where">Shown in: priority weights</p></details>
+      <details><summary>Will it work with poor connectivity at the last mile?</summary><p>Clinic staff approve and report by SMS or USSD. If a message cannot be confirmed, the case escalates. No patient data is used, only consignment, route and facility data.</p><p class="where">Pilot scope</p></details>
+      <details><summary>Does it act when nothing needs doing?</summary><p>No. In the Hormuz scenario it confirms none of our lots are exposed, raises a watch level and logs why it chose not to act.</p><p class="where">Shown in: Strait of Hormuz closed</p></details>
+      <details><summary>Is this feasible for a student team?</summary><p>Yes. The prototype needs public feeds, simulated shipments and standard SAP BTP services. Four agents run end to end in Round 2.</p><p class="where">See the roadmap below</p></details>
+    </div>
+  </section>
+
+  <!-- ================= ROADMAP ================= -->
+  <section class="block" id="roadmap">
+    <div class="sec-head">
+      <div><p class="eyebrow">Impact, feasibility and roadmap</p><h2 style="margin-top:8px">From design thinking to a one-corridor pilot.</h2></div>
+      <p>KPIs are targets to measure in the pilot, not results we claim today.</p>
+    </div>
+    <div class="road-map">
+      <div class="phase"><p class="eyebrow">Phase 1 · Round 1</p><h3>Design</h3><ul><li>Empathy map with planners, nurses, regulators and donors</li><li>Business Model Canvas</li><li>Agent-to-human handoff map</li></ul></div>
+      <div class="phase now-ph"><p class="eyebrow">Phase 2 · Round 2</p><h3>Build</h3><ul><li>Sensing, Scenario, Red-Team and Compliance agents on BTP</li><li>Live RSS and API feeds, simulated corridor</li><li>Demo: Red Sea closure, tariff spike, spoofed alert</li></ul></div>
+      <div class="phase"><p class="eyebrow">Phase 3 · Pilot</p><h3>Prove</h3><ul><li>One corridor with sandbox transport data</li><li>SMS mesh for clinics</li><li>KPI baseline and threshold tuning</li></ul></div>
+      <div class="phase"><p class="eyebrow">Phase 4 · Scale</p><h3>Expand</h3><ul><li>More corridors and product types</li><li>Live SAP TM, IBP and Ariba integration</li><li>Food, relief and smallholder domain packs</li></ul></div>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><b>Minutes, not hours</b><span>From disruption to approved response</span></div>
+      <div class="kpi"><b>Fewer excursions</b><span>Doses lost to cold-chain breaks</span></div>
+      <div class="kpi"><b>Autonomy ratio</b><span>Share of calls handled vs escalated</span></div>
+      <div class="kpi"><b>≈ 0 false actions</b><span>Autonomous calls later judged wrong</span></div>
+      <div class="kpi"><b>100% explained</b><span>Decisions logged with rejected options</span></div>
+    </div>
+    <div class="grid-2" style="margin-top:20px">
+      <div class="stat"><h3>Business model</h3><p><b>Customers:</b> national medical stores, donor-funded immunisation programmes, cold-chain logistics providers. <b>Value:</b> fewer losses, faster safe decisions, audit-ready compliance. <b>Revenue:</b> per-corridor subscription plus an outcome fee on doses saved.</p></div>
+      <div class="stat"><h3>Scales by swapping domain packs</h3><p>The same seven agents run insulin, blood, food supply in disaster-prone regions, or auto parts under tariff shocks. Only the rules, weights and data feeds change.</p></div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <span>Agentic Supply Chain Resilience · SAP Hackfest 2026 · PSG Institute of Technology and Applied Research</span>
+    <span>Simulation values (lots, costs, days, confidence scores) are illustrative, for demonstration only.</span>
+  </footer>
+</main>
+<script>
+/* ================= GEO DATA (lon, lat) ================= */
+const LAND = {
+  africa:[[-17,21],[-16,28],[-10,30],[-6,35.8],[3,36.9],[10,37.2],[11,33],[15.5,32],[20,31],[25,31.6],[29,31.1],[32.3,31.25],[32.45,30.05],[32.5,29.9],[33.5,27.2],[35.5,23.5],[37.2,19],[38.5,17],[39.7,15.5],[41.5,13.5],[43.2,11.7],[44,10.5],[51.2,11.8],[51,10.4],[49,6],[46,2],[42,-1],[40.2,-2.8],[39.7,-4],[39.3,-6.8],[39.8,-8.5],[40.5,-10.5],[40.5,-15],[36.5,-19],[35.3,-22.5],[35.5,-24],[32.8,-26],[31,-29.9],[27.5,-33.5],[22,-34],[18.4,-34.3],[18,-32],[15,-27],[14.5,-22.5],[12,-18],[13.5,-12],[13,-9],[12,-5],[9.5,-1],[9.5,4],[6,4.3],[2,6.3],[-3,5],[-7.5,4.4],[-11,6.9],[-13,8],[-15,11],[-17,14.7],[-16.5,19]],
+  madagascar:[[49.3,-12],[50.4,-15.5],[47.2,-25],[44,-25],[43.3,-22],[44.2,-17],[46.5,-15.5]],
+  eurasia:[[32.6,31.1],[34.5,31.6],[35.5,33.8],[36,36.2],[33,36.2],[30,36.3],[27.3,37],[26.3,39.5],[26,40.6],[23,40.3],[24,37.8],[21.5,36.8],[20,39.6],[19.4,41.8],[15.6,44],[13.6,45.7],[12.3,44.5],[16,41.4],[18.5,40.1],[16,38],[15.6,40],[12.5,41.8],[10,44],[7.5,43.8],[3.2,43.3],[0.2,40],[-0.5,38.3],[-2,36.8],[-5.6,36.1],[-6.3,36.7],[-9,37],[-8.8,42],[-9.3,43.2],[-1.8,43.4],[-1.2,46],[-4.5,47.8],[-1.6,48.7],[1.5,50.2],[4,51.4],[5,53],[8.6,53.9],[9,57],[10,60],[128,60],[128,38],[122,40],[121,37.5],[119,35],[121.8,31],[121.5,28],[119.5,25.5],[117,23.5],[113.5,22.2],[110,21],[108,21.5],[106.5,20],[105.7,18.5],[108.8,15.3],[109.2,12],[107,10.4],[105,8.6],[104.8,10.4],[103,11],[100.8,13.5],[99.3,10],[100.4,7.2],[102.3,6.1],[103.4,4.3],[104.2,1.4],[103.4,1.3],[101.3,2.8],[100.3,5.5],[98.3,8],[98.5,12.5],[97.7,16.5],[94.5,16],[94.2,19.5],[92.3,20.8],[91.8,22.4],[90.5,22],[89,21.8],[87,21.5],[86.8,20.2],[85,19.3],[82.3,17],[80.3,15.5],[80.2,13],[79.8,10.3],[78.2,8.9],[77.5,8],[76.5,8.9],[75.6,11.6],[74.6,14.8],[73.2,17.5],[72.8,19],[72.6,21.4],[70.1,21],[68.9,22.5],[70.2,22.9],[68.4,23.6],[67,24.8],[64,25.3],[61.6,25.2],[57.3,25.8],[56.4,27.1],[54.5,26.7],[51.4,27.9],[50.2,29.9],[48.6,30],[48,29.3],[49.6,27],[50.2,26.2],[51.2,26.1],[51.6,24.6],[54,24.2],[55.5,25.5],[56.3,26.3],[56.3,24.5],[58.6,23.6],[59.8,22.5],[58.5,20.4],[57.7,19],[55.2,17.3],[52.2,15.6],[49,14.4],[45,12.8],[43.5,12.7],[42.8,14.9],[41.2,17.5],[39.2,21.4],[38.4,23.8],[36.6,25.8],[35,28],[34.9,29.5],[34.3,27.8],[33.6,28.3],[32.6,29.9]],
+  britain:[[-5.5,50],[1.5,51.1],[1.7,52.7],[0,53.5],[-1.5,55],[-3,55.8],[-5.5,58.5],[-6.2,56.5],[-4.5,54.7],[-3,53.4],[-4.7,52.8],[-5.2,51.7]],
+  srilanka:[[79.9,9.8],[81.9,7.5],[81.6,6.1],[80.1,5.9],[79.8,7]],
+  sumatra:[[95.3,5.6],[97.5,5.2],[100.3,2.3],[104,-1],[106,-5.9],[104.5,-5.9],[101.5,-3.2],[99,0.2],[96.5,3.6]],
+  borneo:[[109,1.5],[111,2.8],[113.5,4.5],[116,6.8],[119,5],[118,1],[116.5,-2.5],[114,-3.8],[110.5,-3],[109.5,-1]],
+  java:[[105.5,-6.3],[108,-6.3],[111,-6.5],[114.5,-7.6],[114,-8.6],[110,-8.1],[106.5,-7.4]]
+};
+const LAKE_VICTORIA=[[31.8,-1],[32.5,-2.6],[33.5,-2.5],[34.5,-1.2],[34.1,-0.1],[33.2,0.3],[32.2,0.2]];
+
+const PORTS = {
+  antwerp:[4.3,51.25,'Antwerp'], gibraltar:[-5.4,36.1,'Gibraltar'], portsaid:[32.3,31.3,'Port Said'],
+  bab:[43.4,12.6,'Bab el-Mandeb'], djibouti:[43.15,11.6,'Djibouti'], jebelali:[55.05,25.05,'Jebel Ali'],
+  hormuz:[56.5,26.6,'Hormuz'], nhava:[72.95,18.95,'Nhava Sheva'], colombo:[79.85,6.95,'Colombo'],
+  singapore:[103.8,1.3,'Singapore'], shanghai:[121.5,31.2,'Shanghai'], mombasa:[39.66,-4.05,'Mombasa'],
+  dar:[39.28,-6.8,'Dar es Salaam'], durban:[31.03,-29.87,'Durban'], cape:[18.45,-33.95,'Cape Town'],
+  brussels:[4.35,50.85,'Brussels'], nairobi:[36.82,-1.29,'Nairobi']
+};
+
+const P = {
+  EU_SUEZ:[[4.3,51.25],[2.2,51.2],[1.3,50.7],[-3,49.6],[-6,48.4],[-9.6,43.6],[-9.9,38.5],[-8.9,36.7],[-5.6,35.95],[-2,36.4],[3,37.4],[9.5,37.6],[11.6,37.1],[16,35.6],[22,34.6],[28,33.4],[32.3,31.4]],
+  SUEZ_RED:[[32.3,31.4],[32.45,30.0],[32.62,29.6],[33.6,27.8],[35.3,25.3],[37.6,21.2],[39.6,17.4],[41.6,14.4],[43.3,12.6],[45.2,12.1],[48.5,12.6],[51.8,12.2]],
+  HORN_ASIA:[[51.8,12.2],[58,11],[66,9],[74,6.8],[79.9,5.6],[86,5.6],[92,5.8],[95.6,5.9],[98.5,4.2],[101.2,2.6],[103.7,1.2],[105.5,2.5],[108.5,6.5],[110.5,11],[112.8,16],[115.5,20.5],[119.2,23.8],[122.4,29.5],[121.9,31.1]],
+  HORN_MOMBASA:[[51.8,12.2],[52.3,10],[50.2,5],[47.3,1],[43.5,-2.3],[40.6,-3.9],[39.72,-4.05]],
+  CAPE:[[-5.6,35.95],[-8.5,34],[-13.5,28.5],[-18.2,21],[-18.8,14.5],[-15,9],[-9,3.8],[-1,1.5],[5.5,-1.5],[9,-7],[11,-14],[12.5,-20],[14.2,-26],[16.2,-31],[18.2,-35.3],[21,-36],[25,-35.4],[29,-32.8],[31.2,-30]],
+  CAPE_ASIA:[[31.2,-30],[35.5,-31],[42,-29.5],[48,-27.5],[54,-21],[60,-12],[66,-3],[72,3],[79.9,5.6]],
+  MOZ:[[31.2,-30],[33.8,-26],[36.3,-24],[37.3,-20],[40.8,-15.5],[41.6,-11],[40.4,-7.5],[39.72,-4.05]],
+  GULF:[[55.0,25.1],[55.8,25.9],[56.6,26.55],[57.3,25.6],[58.8,23.9],[60.5,22.4],[63,19.5],[67.5,14],[72,8.5],[76.5,6.2],[79.9,5.6]],
+  NHAVA_COLOMBO:[[72.85,18.95],[72,15],[74.2,9],[77,6.4],[79.9,5.6],[86,5.6],[92,5.8],[95.6,5.9],[98.5,4.2],[101.2,2.6],[103.7,1.2]],
+  NHAVA_MOMBASA:[[72.85,18.95],[71.5,17],[66,12],[58,6],[50,0.5],[44,-2.8],[40.6,-3.9],[39.72,-4.05]],
+  SHANGHAI_MOMBASA:[[121.9,31.1],[122.4,29.5],[119.2,23.8],[115.5,20.5],[112.8,16],[110.5,11],[108.5,6.5],[105.5,2.5],[103.7,1.2],[101.2,2.6],[98.5,4.2],[95.6,5.9],[92,5.8],[86,5.6],[79.9,5.6],[70,3],[58,0],[48,-2],[42.5,-3.6],[39.72,-4.05]]
+};
+function cat(...ps){const out=[];ps.forEach((p,i)=>{p.forEach((pt,j)=>{if(i>0&&j===0)return;out.push(pt)})});return out}
+P.ASIA_EU = cat(P.EU_SUEZ,P.SUEZ_RED,P.HORN_ASIA);
+P.VX = cat(P.EU_SUEZ,P.SUEZ_RED.slice(0,-1),P.HORN_MOMBASA.map((p,i)=>i===0?[48.5,12.6]:p));
+P.CAPE_FULL = cat(P.EU_SUEZ.slice(0,9),P.CAPE,P.CAPE_ASIA,P.HORN_ASIA.slice(4));
+
+/* Kenya / Tanzania roads for the last-mile inset */
+const ROADS = {
+  MOMBASA_NAIROBI:[[39.66,-4.04],[39.2,-3.8],[38.56,-3.4],[37.9,-2.6],[37.3,-2.0],[36.82,-1.29]],
+  DAR_NAIROBI:[[39.28,-6.8],[38.9,-6.0],[39.1,-5.07],[38.3,-4.6],[37.35,-3.35],[36.68,-3.37],[36.8,-2.7],[36.82,-1.29]],
+  NBO_GARISSA:[[36.82,-1.29],[37.5,-1.1],[38.4,-0.8],[39.64,-0.45]],
+  NBO_KISUMU:[[36.82,-1.29],[36.2,-0.9],[35.3,-0.3],[34.76,-0.09]],
+  NBO_LODWAR:[[36.82,-1.29],[36.9,-0.4],[36.1,0.5],[35.3,1.6],[35.6,3.12]]
+};
+const TOWNS = [
+  [36.82,-1.29,'Nairobi regional store','store'],[39.66,-4.04,'Mombasa','port'],[39.28,-6.8,'Dar es Salaam depot','store'],
+  [39.64,-0.45,'Garissa · outbreak zone','clinic-hot'],[34.76,-0.09,'Kisumu clinics','clinic'],[35.6,3.12,'Lodwar clinics','clinic']
+];
+
+const ZONES = {
+  redsea:{poly:[[32.3,30.3],[34.8,29.9],[38.5,23],[43.8,15.8],[47.2,13.8],[47.2,10.6],[43.6,10.6],[41,13.2],[36.8,18.6],[33.3,25.8]],label:'RED SEA · CLOSED TO TRANSIT',at:[30.5,21.5]},
+  hormuz:{poly:[[53.4,24.1],[56.2,23.9],[57.8,25.2],[57.2,27.4],[55.4,27.2],[52.6,26.2],[50.6,26.8],[49.2,28.8],[48.4,29.6],[48.2,28.2],[50.2,25.7]],label:'HORMUZ · CLOSED',at:[52,31.2]}
+};
+
+/* ================= PATH MATH ================= */
+function makePath(pts){
+  const cum=[0];
+  for(let i=1;i<pts.length;i++){const dx=pts[i][0]-pts[i-1][0],dy=pts[i][1]-pts[i-1][1];cum.push(cum[i-1]+Math.hypot(dx,dy))}
+  return {pts,cum,len:cum[cum.length-1]};
+}
+function pathAt(path,d){
+  d=Math.max(0,Math.min(path.len,d));
+  let i=1;while(i<path.cum.length-1&&path.cum[i]<d)i++;
+  const a=path.pts[i-1],b=path.pts[i],seg=path.cum[i]-path.cum[i-1]||1,t=(d-path.cum[i-1])/seg;
+  return {lon:a[0]+(b[0]-a[0])*t,lat:a[1]+(b[1]-a[1])*t,ang:Math.atan2(-(b[1]-a[1]),b[0]-a[0])};
+}
+function nearestD(path,lon,lat){
+  let best=0,bd=1e9;
+  for(let d=0;d<=path.len;d+=0.1){const p=pathAt(path,d),dd=Math.hypot(p.lon-lon,p.lat-lat);if(dd<bd){bd=dd;best=d}}
+  return best;
+}
+function inPoly(lon,lat,poly){
+  let c=false;for(let i=0,j=poly.length-1;i<poly.length;j=i++){
+    const [xi,yi]=poly[i],[xj,yj]=poly[j];
+    if(((yi>lat)!==(yj>lat))&&(lon<(xj-xi)*(lat-yi)/(yj-yi)+xi))c=!c;
+  }return c;
+}
+function reversed(pts){return pts.slice().reverse()}
+
+/* ================= MAP ================= */
+const COL={sea:'#DCEAF1',seaDeep:'#D2E4EC',land:'#E9ECE6',edge:'#C3CCBF',grid:'rgba(39,64,122,.07)',gridTxt:'#8C9AA8',ink:'#13233A',ink2:'#46566B',
+  lot:'#8A2C4F',navy:'#27407A',hold:'#9AA6B2',ok:'#1F7447',warn:'#A85A0C',bad:'#B3261E',new:'#6A3FA0',lane:'rgba(39,64,122,.18)'};
+
+const World = (()=>{
+  const cv=document.getElementById('map');const ctx=cv.getContext('2d');
+  let W=0,H=0,dpr=1,view=null,inset=null;
+  const ents=[];const pins=[];const zones={redsea:false,hormuz:false};const hilite=new Set();
+  let tLast=performance.now(),speed=1,paused=false;
+
+  function fit(){
+    const r=cv.getBoundingClientRect();dpr=Math.min(2,window.devicePixelRatio||1);
+    W=r.width;H=r.height;cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);
+    const narrow=W<620;
+    const b=narrow?{l:8,r:80,t:40,btm:-36}:{l:-20,r:123,t:57,btm:-40};
+    const s=Math.min(W/(b.r-b.l),H/(b.t-b.btm));
+    const ox=(W-(b.r-b.l)*s)/2,oy=(H-(b.t-b.btm)*s)/2;
+    view={b,s,ox,oy};
+    const iw=narrow?Math.max(118,W*.33):Math.min(230,Math.max(150,W*.19)),ih=iw*1.3;
+    inset={x:10,y:H-ih-10,w:iw,h:ih,b:{l:33,r:41.8,t:5.4,btm:-7.9}};
+  }
+  const X=(lon)=>view.ox+(lon-view.b.l)*view.s, Y=(lat)=>view.oy+(view.b.t-lat)*view.s;
+  const IX=(lon)=>inset.x+(lon-inset.b.l)/(inset.b.r-inset.b.l)*inset.w, IY=(lat)=>inset.y+(inset.b.t-lat)/(inset.b.t-inset.b.btm)*inset.h;
+
+  function poly(pts,px,py){ctx.beginPath();pts.forEach((p,i)=>{const x=px(p[0]),y=py(p[1]);i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.closePath()}
+  function line(pts,px,py){ctx.beginPath();pts.forEach((p,i)=>{const x=px(p[0]),y=py(p[1]);i?ctx.lineTo(x,y):ctx.moveTo(x,y)})}
+  let hatch=null;
+  function getHatch(){
+    if(hatch)return hatch;const c=document.createElement('canvas');c.width=c.height=10;const g=c.getContext('2d');
+    g.fillStyle='rgba(251,231,229,.85)';g.fillRect(0,0,10,10);g.strokeStyle='rgba(179,38,30,.55)';g.lineWidth=2;
+    g.beginPath();g.moveTo(-2,12);g.lineTo(12,-2);g.stroke();g.beginPath();g.moveTo(8,12);g.lineTo(12,8);g.stroke();g.beginPath();g.moveTo(-2,2);g.lineTo(2,-2);g.stroke();
+    hatch=ctx.createPattern(c,'repeat');return hatch;
+  }
+
+  function drawBase(){
+    ctx.fillStyle=COL.sea;ctx.fillRect(0,0,W,H);
+    // graticule
+    ctx.strokeStyle=COL.grid;ctx.lineWidth=1;ctx.font='10px "IBM Plex Mono", monospace';ctx.fillStyle=COL.gridTxt;
+    for(let lon=-20;lon<=120;lon+=10){const x=X(lon);if(x<0||x>W)continue;ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();ctx.fillText((Math.abs(lon))+'°'+(lon<0?'W':lon>0?'E':''),x+3,H-4)}
+    for(let lat=-30;lat<=50;lat+=10){const y=Y(lat);if(y<0||y>H)continue;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();ctx.fillText((Math.abs(lat))+'°'+(lat<0?'S':lat>0?'N':''),4,y-3)}
+    // equator emphasis
+    ctx.strokeStyle='rgba(39,64,122,.14)';ctx.setLineDash([4,5]);ctx.beginPath();ctx.moveTo(0,Y(0));ctx.lineTo(W,Y(0));ctx.stroke();ctx.setLineDash([]);
+    // land
+    ctx.fillStyle=COL.land;ctx.strokeStyle=COL.edge;ctx.lineWidth=1;
+    Object.values(LAND).forEach(pts=>{poly(pts,X,Y);ctx.fill();ctx.stroke()});
+    ctx.fillStyle=COL.sea;poly(LAKE_VICTORIA,X,Y);ctx.fill();
+    // zones
+    Object.entries(ZONES).forEach(([k,z])=>{if(!zones[k])return;poly(z.poly,X,Y);ctx.fillStyle=getHatch();ctx.fill();ctx.strokeStyle=COL.bad;ctx.lineWidth=1.5;ctx.stroke();
+      ctx.font='600 10.5px "IBM Plex Mono", monospace';const tx=X(z.at[0]),ty=Y(z.at[1]);const w=ctx.measureText(z.label).width+10;
+      ctx.fillStyle=COL.bad;roundRect(tx-w/2,ty-9,w,18,4);ctx.fill();ctx.fillStyle='#fff';ctx.textAlign='center';ctx.fillText(z.label,tx,ty+4);ctx.textAlign='left'});
+    // lanes
+    ctx.lineWidth=1.2;ctx.setLineDash([3,4]);
+    [P.ASIA_EU,P.CAPE_FULL,P.GULF,P.NHAVA_COLOMBO,P.HORN_MOMBASA,P.MOZ,P.NHAVA_MOMBASA].forEach(p=>{ctx.strokeStyle=COL.lane;line(p,X,Y);ctx.stroke()});
+    ctx.setLineDash([]);
+    hilite.forEach(h=>{ctx.strokeStyle=h.color;ctx.lineWidth=2.4;ctx.setLineDash(h.dash||[]);line(h.pts,X,Y);ctx.stroke();ctx.setLineDash([])});
+    // canal
+    ctx.strokeStyle='#7FA6BE';ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(X(32.3),Y(31.3));ctx.lineTo(X(32.55),Y(29.95));ctx.stroke();
+    // ports
+    ctx.font='500 10.5px "IBM Plex Sans", Arial, sans-serif';
+    const show=['antwerp','gibraltar','portsaid','bab','jebelali','nhava','colombo','singapore','shanghai','mombasa','durban','cape'];
+    show.forEach(k=>{const [lon,lat,name]=PORTS[k];const x=X(lon),y=Y(lat);if(x<0||x>W||y<0||y>H)return;
+      ctx.fillStyle='#fff';ctx.strokeStyle=COL.ink;ctx.lineWidth=1.3;ctx.beginPath();ctx.arc(x,y,3,0,7);ctx.fill();ctx.stroke();
+      const lx=k==='shanghai'?x-6:x+6,al=k==='shanghai'?'right':'left';ctx.textAlign=al;
+      const ly=(k==='bab')?y+13:(k==='portsaid'?y-6:(k==='mombasa'?y+12:y+3.5));
+      ctx.fillStyle='rgba(255,255,255,.75)';const tw=ctx.measureText(name).width;ctx.fillRect(al==='left'?lx-2:lx-tw-2,ly-9,tw+4,12);
+      ctx.fillStyle=COL.ink2;ctx.fillText(name,lx,ly);ctx.textAlign='left'});
+    // inset footprint
+    ctx.strokeStyle='rgba(19,35,58,.45)';ctx.lineWidth=1;ctx.setLineDash([2,2]);ctx.strokeRect(X(inset.b.l),Y(inset.b.t),X(inset.b.r)-X(inset.b.l),Y(inset.b.btm)-Y(inset.b.t));ctx.setLineDash([]);
+  }
+  function roundRect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+
+  function drawShip(x,y,ang,color,size,alpha,anchored){
+    ctx.save();ctx.globalAlpha=alpha;ctx.translate(x,y);ctx.rotate(ang);
+    const L=size,Wd=size*.42;
+    ctx.fillStyle=color;ctx.beginPath();ctx.moveTo(L*.55,0);ctx.lineTo(L*.2,-Wd/2);ctx.lineTo(-L*.45,-Wd/2);ctx.lineTo(-L*.45,Wd/2);ctx.lineTo(L*.2,Wd/2);ctx.closePath();ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,.75)';ctx.fillRect(-L*.32,-Wd*.28,L*.12,Wd*.56);
+    ctx.restore();
+    if(anchored){ctx.save();ctx.globalAlpha=alpha*.8;ctx.strokeStyle=color;ctx.lineWidth=1;ctx.beginPath();ctx.arc(x,y,size*.75,0,7);ctx.stroke();ctx.restore()}
+  }
+  function drawPlane(x,y,ang,color){
+    ctx.save();ctx.translate(x,y);ctx.rotate(ang);ctx.fillStyle=color;
+    ctx.beginPath();ctx.moveTo(9,0);ctx.lineTo(-7,-1.6);ctx.lineTo(-7,1.6);ctx.closePath();ctx.fill();
+    ctx.beginPath();ctx.moveTo(2,0);ctx.lineTo(-3,-7);ctx.lineTo(-5,-7);ctx.lineTo(-2,0);ctx.lineTo(-5,7);ctx.lineTo(-3,7);ctx.closePath();ctx.fill();
+    ctx.beginPath();ctx.moveTo(-5,0);ctx.lineTo(-8,-3.5);ctx.lineTo(-9,-3.5);ctx.lineTo(-8,0);ctx.lineTo(-9,3.5);ctx.lineTo(-8,3.5);ctx.closePath();ctx.fill();
+    ctx.restore();
+  }
+  function drawTruck(x,y,ang,color){
+    ctx.save();ctx.translate(x,y);ctx.rotate(ang);ctx.fillStyle=color;roundRect(-7,-3.5,10,7,1.5);ctx.fill();ctx.fillStyle='#13233A';roundRect(3.5,-3.2,4,6.4,1.2);ctx.fill();ctx.restore();
+  }
+  function label(x,y,text,color,dy){
+    ctx.font='600 11px "IBM Plex Mono", monospace';const w=ctx.measureText(text).width+10;const lx=Math.min(Math.max(4,x-w/2),W-w-4),ly=y+(dy||-22);
+    ctx.fillStyle=color;roundRect(lx,ly-9,w,18,4);ctx.fill();ctx.fillStyle='#fff';ctx.fillText(text,lx+5,ly+4);
+  }
+
+  function drawInset(){
+    const {x,y,w,h}=inset;
+    ctx.save();ctx.fillStyle='rgba(19,35,58,.08)';roundRect(x+2,y+3,w,h,8);ctx.fill();
+    roundRect(x,y,w,h,8);ctx.fillStyle=COL.sea;ctx.fill();ctx.clip();
+    ctx.fillStyle=COL.land;ctx.strokeStyle=COL.edge;poly(LAND.africa,IX,IY);ctx.fill();ctx.stroke();
+    ctx.fillStyle=COL.sea;poly(LAKE_VICTORIA,IX,IY);ctx.fill();
+    // borders hint (Kenya/Tanzania) — dashed
+    ctx.strokeStyle='rgba(70,86,107,.35)';ctx.setLineDash([3,3]);line([[33.9,-1.0],[37.6,-3.0],[39.2,-4.7]],IX,IY);ctx.stroke();ctx.setLineDash([]);
+    ctx.strokeStyle='#B9A98B';ctx.lineWidth=1.6;Object.values(ROADS).forEach(r=>{line(r,IX,IY);ctx.stroke()});
+    // towns
+    ctx.font='500 10px "IBM Plex Sans", Arial, sans-serif';
+    TOWNS.forEach(([lon,lat,name,kind])=>{const tx=IX(lon),ty=IY(lat);
+      if(kind==='clinic-hot'){ctx.fillStyle=COL.bad;ctx.beginPath();ctx.arc(tx,ty,4.5,0,7);ctx.fill();ctx.fillStyle='#fff';ctx.fillRect(tx-2.5,ty-.8,5,1.6);ctx.fillRect(tx-.8,ty-2.5,1.6,5)}
+      else if(kind==='clinic'){ctx.fillStyle=COL.ok;ctx.beginPath();ctx.arc(tx,ty,4,0,7);ctx.fill();ctx.fillStyle='#fff';ctx.fillRect(tx-2.2,ty-.7,4.4,1.4);ctx.fillRect(tx-.7,ty-2.2,1.4,4.4)}
+      else if(kind==='store'){ctx.fillStyle=COL.navy;ctx.fillRect(tx-4,ty-4,8,8)}
+      else{ctx.fillStyle='#fff';ctx.strokeStyle=COL.ink;ctx.beginPath();ctx.arc(tx,ty,3.2,0,7);ctx.fill();ctx.stroke()}
+      const short=name.split(' · ')[0].replace(' regional store','').replace(' depot','').replace(' clinics','');
+      const right=lon>38.8;ctx.textAlign=right?'right':'left';ctx.fillStyle=COL.ink2;ctx.fillText(short,right?tx-7:tx+7,ty+3.5);ctx.textAlign='left'});
+    // inset entities
+    ents.filter(e=>e.inset).forEach(e=>{const p=pathAt(e.path,e.d);const px=IX(p.lon),py=IY(p.lat);drawTruck(px,py,p.ang,e.color);});
+    ctx.restore();
+    ctx.strokeStyle='rgba(19,35,58,.35)';ctx.lineWidth=1;roundRect(x,y,w,h,8);ctx.stroke();
+    ctx.font='600 10px "IBM Plex Mono", monospace';ctx.fillStyle=COL.ink;ctx.fillStyle='rgba(255,255,255,.9)';ctx.fillRect(x+6,y+6,w-12,16);ctx.fillStyle=COL.ink;ctx.fillText('LAST MILE · KENYA',x+10,y+17.5);
+  }
+
+  function drawPins(t){
+    pins.forEach(p=>{const x=X(p.lon),y=Y(p.lat);const pulse=(Math.sin(t/300)+1)/2;
+      ctx.fillStyle=p.color;ctx.globalAlpha=.18+.2*pulse;ctx.beginPath();ctx.arc(x,y,10+6*pulse,0,7);ctx.fill();ctx.globalAlpha=1;
+      ctx.beginPath();ctx.arc(x,y,7,0,7);ctx.fill();ctx.fillStyle='#fff';ctx.font='700 10px "IBM Plex Mono", monospace';ctx.textAlign='center';ctx.fillText(p.glyph||'!',x,y+3.5);ctx.textAlign='left';
+      if(p.text){label(x,y,p.text,p.color,p.dy||-20)}});
+  }
+
+  function step(dt){
+    ents.forEach(e=>{
+      if(e.state==='hold')return;
+      const v=e.speed*dt*speed;
+      // zone-aware hold for background ships
+      if(e.bg){
+        const nxt=pathAt(e.path,e.d+v);
+        if(zones.redsea&&e.tags.includes('suez')&&inPoly(nxt.lon,nxt.lat,ZONES.redsea.poly)){e.state='hold';e.color=COL.hold;return}
+        if(zones.hormuz&&e.tags.includes('gulf')){const here=pathAt(e.path,e.d);if(here.lon<60.5){e.state='hold';e.color=COL.hold;return}}
+      }
+      e.d+=v;
+      if(e.stopAt!=null&&e.d>=e.stopAt){e.d=e.stopAt;e.state='hold';e.stopAt=null;if(e.onStop){const f=e.onStop;e.onStop=null;f(e)}return}
+      if(e.d>=e.path.len){
+        if(e.loop){e.d=0}else{e.d=e.path.len;e.state='done';if(e.onArrive){const f=e.onArrive;e.onArrive=null;f(e)}}
+      }
+    });
+    for(let i=ents.length-1;i>=0;i--){if(ents[i].state==='done'&&ents[i].vanish)ents.splice(i,1)}
+  }
+
+  function frame(t){
+    const dt=Math.min(.05,(t-tLast)/1000);tLast=t;
+    if(!paused)step(dt);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    drawBase();
+    // trails for highlighted entities
+    ents.forEach(e=>{if(e.inset)return;const p=pathAt(e.path,e.d);const x=X(p.lon),y=Y(p.lat);
+      const fade=e.loop?Math.min(1,e.d/1.2,(e.path.len-e.d)/1.2):1;
+      if(e.kind==='plane'){ctx.strokeStyle='rgba(31,116,71,.5)';ctx.setLineDash([4,4]);ctx.lineWidth=1.5;line(e.path.pts,X,Y);ctx.stroke();ctx.setLineDash([]);drawPlane(x,y,p.ang,e.color)}
+      else if(e.kind==='truck'){ctx.fillStyle=e.color;ctx.beginPath();ctx.arc(x,y,2.5,0,7);ctx.fill()}
+      else{
+        if(e.hero){ctx.fillStyle='rgba(138,44,79,.14)';ctx.beginPath();ctx.arc(x,y,15+2*Math.sin(t/250),0,7);ctx.fill()}
+        drawShip(x,y,p.ang,e.color,e.size||11,fade,e.state==='hold');
+      }
+      if(e.label&&!e.inset)label(x,y,e.label,e.labelColor||e.color,e.labelDy);
+    });
+    drawPins(t);
+    drawInset();
+    requestAnimationFrame(frame);
+  }
+
+  function addEnt(o){const e=Object.assign({d:0,speed:2.2,state:'move',loop:false,color:COL.navy,tags:[],kind:'ship'},o);e.path=o.path.len?o.path:makePath(o.path);if(o.startAt!=null)e.d=o.startAt*e.path.len;ents.push(e);return e}
+
+  function seedBackground(){
+    const lanes=[
+      {pts:P.ASIA_EU,n:7,tags:['suez']},{pts:P.CAPE_FULL,n:3,tags:['cape']},{pts:P.GULF,n:4,tags:['gulf']},
+      {pts:P.NHAVA_COLOMBO,n:2,tags:['india']},{pts:P.HORN_MOMBASA,n:1,tags:['feeder']},{pts:P.MOZ,n:2,tags:['feeder']}
+    ];
+    lanes.forEach(l=>{for(let i=0;i<l.n;i++){const rev=i%2===1;const pts=rev?reversed(l.pts):l.pts;
+      addEnt({path:pts,bg:true,loop:true,startAt:(i+.3)/l.n,speed:1.6+Math.random()*.9,tags:l.tags,color:COL.navy,size:10})}});
+  }
+
+  function reset(){
+    ents.length=0;pins.length=0;zones.redsea=false;zones.hormuz=false;hilite.clear();seedBackground();
+  }
+  fit();reset();
+  new ResizeObserver(()=>fit()).observe(cv);
+  requestAnimationFrame(frame);
+
+  return {
+    reset,addEnt,COL,P,ROADS,PORTS,makePath,pathAt,nearestD,
+    setZone(k,on){zones[k]=on;
+      if(!on){ents.forEach(e=>{if(e.bg&&e.state==='hold'){e.state='move';e.color=COL.navy}})}
+    },
+    rerouteSuezToCape(n){for(let i=0;i<n;i++){addEnt({path:i%2?reversed(P.CAPE_FULL):P.CAPE_FULL,bg:true,loop:true,startAt:.05+i*.2,speed:1.9,tags:['cape'],color:COL.navy,size:10})}},
+    pin(o){pins.push(o);return o},clearPins(){pins.length=0},
+    highlight(pts,color,dash){const h={pts,color,dash};hilite.add(h);return h},unhighlight(h){hilite.delete(h)},
+    setSpeed(s){speed=s},setPaused(p){paused=p},
+    ents
+  };
+})();
+/* ================= AGENTS ================= */
+const AGENTS=[
+  {id:'sense',name:'Disruption Sensing',sub:'Reads feeds, scores credibility',chip:'c-sense',label:'Sensing'},
+  {id:'plan',name:'Scenario Planning',sub:'Runs what-ifs, scores options',chip:'c-plan',label:'Scenario Planning'},
+  {id:'red',name:'Red-Team',sub:'Tries to break each plan',chip:'c-red',label:'Red-Team',isNew:true},
+  {id:'comp',name:'Compliance & Audit',sub:'Rules, sanctions, veto, log',chip:'c-comp',label:'Compliance'},
+  {id:'gate',name:'Decision Gate',sub:'Confidence × reversibility',chip:'c-gate',label:'Decision Gate'},
+  {id:'inv',name:'Inventory Rebalancing',sub:'Stock, depots, procurement',chip:'c-inv',label:'Inventory'},
+  {id:'route',name:'Rerouting & Logistics',sub:'Executes through SAP TM',chip:'c-route',label:'Logistics'},
+  {id:'human',name:'Human-in-the-loop',sub:'Decision Card',chip:'c-human',label:'Human'},
+  {id:'trust',name:'Trust Calibration',sub:'Predicted vs actual',chip:'c-trust',label:'Trust Calibration',isNew:true}
+];
+const AG=Object.fromEntries(AGENTS.map(a=>[a.id,a]));
+const ST_LABEL={idle:'Idle',working:'Working',done:'Done',auto:'Acted',escalate:'Escalated',blocked:'Vetoed',waiting:'Waiting',skip:'Not needed'};
+const C=World.COL,PP=World.P,RD=World.ROADS;
+
+/* ================= HELPERS ================= */
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function arc(from,to,bend){const [x1,y1]=from,[x2,y2]=to;const mx=(x1+x2)/2,my=(y1+y2)/2;const dx=x2-x1,dy=y2-y1;const cx=mx-dy*bend,cy=my+dx*bend;const pts=[];for(let i=0;i<=40;i++){const t=i/40;pts.push([(1-t)*(1-t)*x1+2*(1-t)*t*cx+t*t*x2,(1-t)*(1-t)*y1+2*(1-t)*t*cy+t*t*y2])}return pts}
+function dAt(pts,lon,lat){return World.nearestD(World.makePath(pts),lon,lat)}
+
+const SIM={
+  truck(road,label,onArrive,color){return World.addEnt({path:RD[road],inset:true,kind:'truck',speed:.75,color:color||C.ok,label,onArrive})},
+  lastMile(from){
+    const go=()=>{SIM.truck('NBO_GARISSA',null,null,C.bad);setTimeout(()=>SIM.truck('NBO_KISUMU'),900);setTimeout(()=>SIM.truck('NBO_LODWAR'),1800)};
+    if(from==='mombasa')SIM.truck('MOMBASA_NAIROBI',null,go);else go();
+  },
+  vx(startLonLat,opts){
+    const d=dAt(PP.VX,startLonLat[0],startLonLat[1]);
+    return World.addEnt(Object.assign({path:PP.VX,hero:true,color:C.lot,size:15,speed:2.1,label:'VX-2291 · 1.2M doses',labelColor:C.lot},opts||{},{startAt:d/World.makePath(PP.VX).len}));
+  },
+  redirect(e,pts,label){const here=World.pathAt(e.path,e.d);e.path=World.makePath([[here.lon,here.lat],...pts]);e.d=0;e.state='move';e.stopAt=null;if(label)e.label=label}
+};
+
+/* ================= SCENARIOS ================= */
+const W_DEFAULT={time:7,cost:4,integ:9,risk:6,equity:5};
+
+const SCEN={
+redsea:{
+  name:'Red Sea closure',
+  norm:{maxTime:20,maxCost:200},timeUnit:'d',
+  intro:['Monitoring the corridor','Lot VX-2291 is crossing the Mediterranean toward Suez. 142 live signals are being watched: security advisories, weather, tariffs, port congestion and AIS vessel positions.'],
+  viab:{lot:'VX-2291',win:12,eta:6,status:'ok'},
+  setup(ctx){ctx.vx=SIM.vx([16,35.6])},
+  options:[
+    {id:'hold',name:'Hold at Port Said and wait',time:16,cost:9,integ:.3,risk:.5,equity:.2,rev:'Reversible',route:'blocked',why:'Closure length unknown; the 12-day window would run out'},
+    {id:'cape',name:'Reroute VX-2291 via Cape of Good Hope',time:17.5,cost:48,integ:.2,risk:.2,equity:.3,rev:'Reversible',route:'blocked',why:'Arrives day 17.5; window ends day 12'},
+    {id:'bridge',name:'Bridge 40% of demand from Dar es Salaam depot',time:2,cost:18,integ:.9,risk:.05,equity:.9,rev:'Reversible',route:'auto',why:'Confident, undoable, inside the $50k autonomous budget'},
+    {id:'air',name:'Air-freight a replacement lot, Brussels → Nairobi',time:2.5,cost:184,integ:.95,risk:.1,equity:.8,rev:'Partly (48 h cancel)',route:'human',why:'Cost above the $100k threshold',conf:.86},
+    {id:'india',name:'Switch to WHO-prequalified supplier, Nhava Sheva → Mombasa',time:10.5,cost:62,integ:.85,risk:.3,equity:.75,rev:'Irreversible',route:'human',why:'Primary supplier switch + import permit amendment',conf:.78}
+  ],
+  human:{ids:['air','india'],title:'Replace the doses stuck behind the closure',
+    text:'VX-2291 cannot reach Mombasa inside its cold-chain window. The Dar es Salaam bridge covers 40% of demand until day 11. Choose how the rest reaches Nairobi. VX-2291 will be discharged at Port Said and its doses reallocated to a North Africa programme where the window still holds.',
+    protect:'Hold-and-protect running: cold rooms and 2 reefer trucks reserved (cancellable 48 h, $4.2k)'},
+  steps:[
+    {agent:'sense',t:0,pipe:{sense:'done'},title:'Red Sea closed to commercial transit',
+      text:'Five independent sources agree within 40 minutes: a UKMTO security advisory, notices from four carriers, and AIS showing vessels turning away from Bab el-Mandeb. Credibility 0.96. Severity for our corridor: CRITICAL, because VX-2291 is 30 hours from the canal.',
+      fx(ctx){World.setZone('redsea',true);World.rerouteSuezToCape(3);const v=ctx.vx;v.stopAt=World.nearestD(v.path,32.3,31.4)-.35;v.label='VX-2291 · holding off Port Said'},
+      viab:{eta:null,status:'bad',note:'Route blocked'},
+      log:{act:'Classified: Red Sea closure, severity CRITICAL',why:'5 independent sources agree; AIS confirms diversions. VX-2291 route crosses the closed zone.',src:'UKMTO advisory · carrier notices ×4 · AIS · news wire'}},
+    {agent:'plan',t:.4,pipe:{plan:'done'},showOptions:true,title:'Five what-if options, checked against the Viability Clock',
+      text:'VX-2291 has 12 days of qualified cold-chain life left and Nairobi\'s regional store runs out in 8 days. Options that arrive after the window closes are blocked, whatever they cost. Move the weights below to re-rank the rest.',
+      log:{act:'Generated 5 options; 2 blocked by the Viability Clock',why:'Hard constraint: arrival must fall inside the remaining cold-chain window.',src:'SAP TM lanes · carrier schedules · IBP demand plan',rej:['Reroute via Cape of Good Hope: arrives day 17.5, window ends day 12','Hold at Port Said: closure length unknown, window would expire']}},
+    {agent:'red',t:.7,pipe:{red:'done'},title:'Red-Team tries to break the surviving plans',
+      text:'Spoof check passed (5 independent sources). Air: Nairobi airport has one qualified cold room, capacity confirmed. India sea route: the Arabian Sea security advisory is elevated, so its confidence drops from 0.86 to 0.78. Dar es Salaam bridge: the depot stays above 30% safety stock.',
+      log:{act:'Pre-mortem: India sea option confidence lowered to 0.78',why:'Elevated Arabian Sea advisory on the alternate lane. No weakness found in the air and bridge options.',src:'Maritime security feed · airport cold-room register'}},
+    {agent:'comp',t:.9,pipe:{comp:'done'},title:'Compliance checks every option',
+      text:'No sanctioned ports or carriers on any route. The air shipment needs a dry-ice declaration, which is ready. Switching supplier needs an amended Kenya import permit, a regulatory filing that cannot be quickly undone, so it must go to a person.',
+      log:{act:'All options compliant; supplier switch flagged irreversible',why:'Sanctions screen clear. GDP cold-chain rules met. Permit amendment required for the new supplier.',src:'Sanctions lists · national drug authority rules'}},
+    {agent:'gate',t:1,pipe:{gate:'done'},title:'The Decision Gate sorts every action',
+      text:'Two actions are confident and undoable, so they run now without waiting. Choosing the replacement supply is costly or irreversible, so it goes to a person with a recommendation.',
+      gate:[{n:1,name:'Bridge stock from Dar es Salaam',conf:.91,rev:.85,out:'auto'},{n:2,name:'Reversible bookings (hold-and-protect)',conf:.95,rev:.95,out:'auto'},{n:3,name:'Air-freight replacement lot',conf:.86,rev:.35,out:'escalate'},{n:4,name:'Switch to India supplier',conf:.78,rev:.1,out:'escalate'}],
+      log:{act:'Gate: 2 autonomous, 2 escalated',why:'Autonomous needs confidence ≥ 0.80 AND reversible. Air exceeds the cost threshold; supplier switch is irreversible.',src:'Gate policy v1 · threshold 0.80'}},
+    {agent:'inv',t:1.1,pipe:{inv:'auto'},title:'Bridge stock from Dar es Salaam (autonomous)',
+      text:'480,000 doses leave the Dar es Salaam depot by reefer truck for Nairobi, covering 40% of demand and moving the stock-out from day 8 to day 11. The Garissa outbreak zone is served first (Clinical Priority Index 0.92).',
+      fx(){SIM.truck('DAR_NAIROBI',null,()=>SIM.lastMile('nairobi'))},
+      log:{act:'Released 480k doses: Dar es Salaam → Nairobi',why:'Confidence 0.91, reversible, $18k of a $50k autonomous budget. Depot keeps 34% safety stock. Garissa first by Clinical Priority Index.',src:'IBP stock levels · depot telemetry',rej:['Drain Dar es Salaam fully: depot would fall below 30% safety stock']}},
+    {agent:'route',t:1.2,pipe:{route:'auto'},title:'Hold-and-protect: reversible bookings while a person decides',
+      text:'A qualified cold room is pre-booked in Mombasa and at Nairobi airport, and two reefer trucks are reserved. Everything cancels free for 48 hours ($4.2k). VX-2291 waits at anchor with power to its reefer containers.',
+      log:{act:'Pre-booked cold rooms + 2 reefer trucks (cancellable)',why:'Keeps both replacement options open. Waiting for a decision costs nothing irreversible.',src:'SAP TM bookings · carrier API'}},
+    {agent:'human',t:1.3,pipe:{human:'waiting'},human:true,title:'Waiting for a person: the Decision Card is open',
+      text:'The replacement-supply choice is above the cost threshold or irreversible. Pick an option below the map. The recommendation follows the priority weights.'}
+  ],
+  post(ch){
+    const air=ch==='air';
+    return [
+      {agent:'route',t:2.2,pipe:{route:'done'},title:air?'Air replacement lot booked: Brussels → Nairobi':'Supplier switch approved: Nhava Sheva → Mombasa',
+        text:air?'An 800,000-dose lot flies Brussels to Nairobi on a qualified pharma freighter and arrives in 2.5 days. VX-2291 berths at Port Said and its doses are reallocated to a North Africa programme while its window still holds.':'The WHO-prequalified supplier ships 800,000 doses from Nhava Sheva by reefer vessel and arrives at Mombasa in 10.5 days, inside the day-11 stock-out. VX-2291 berths at Port Said and its doses are reallocated to a North Africa programme.',
+        fx(ctx){const v=ctx.vx;v.state='move';v.stopAt=World.nearestD(v.path,32.3,31.4);v.label='VX-2291 · reallocated at Port Said';
+          if(air){World.addEnt({path:arc([4.35,50.85],[36.9,-1.3],.18),kind:'plane',speed:4,color:C.ok,label:'RX-AIR · 800k doses',labelColor:C.ok,onArrive:()=>SIM.lastMile('nairobi')})}
+          else{World.addEnt({path:PP.NHAVA_MOMBASA,speed:2.2,color:C.ok,size:14,label:'RX-IN · 800k doses',labelColor:C.ok,hero:false,onArrive:()=>SIM.lastMile('mombasa')})}},
+        viab:air?{lot:'RX-AIR',win:20,eta:2.5,status:'ok',note:'Replacement lot'}:{lot:'RX-IN',win:18,eta:10.5,status:'ok',note:'Replacement lot'},
+        log:{act:air?'Executed: air replacement lot booked':'Executed: supplier switch + reefer booking',why:'Approved on the Decision Card by the logistics planner.',src:'SAP TM · SAP Ariba · Build Process Automation approval',rej:[air?'Switch to India supplier: slower (10.5 d), irreversible permit change':'Air freight: $184k, above cost threshold; approver preferred lower cost','Reroute via Cape: blocked by Viability Clock','Hold at Port Said: blocked by Viability Clock']}},
+      {agent:'comp',t:2.4,pipe:{comp:'done'},title:'Audit trail sealed',
+        text:'Every step is logged with a timestamp, its sources, its rationale and the options that were rejected. An audit-ready report is available for the national drug authority and the donor.',
+        log:{act:'Audit report generated',why:'Covers 9 decisions, 2 autonomous actions, 1 human approval, 5 rejected alternatives.',src:'SAP Audit Log'}},
+      {agent:'trust',t:air?64:260,pipe:{trust:'done'},title:'Trust Calibration: did the predictions hold?',
+        text:air?'Air ETA predicted 2.5 days, actual 2.6. Dar es Salaam bridge predicted 2.0 days, actual 2.3. Both are inside the ±20% tolerance, so the autonomy threshold holds at 0.80.':'Sea ETA predicted 10.5 days, actual 12.8 because of monsoon swell: +22%, outside the ±20% tolerance. The threshold tightens to 0.84, so similar calls escalate until trust is re-earned.',
+        trust:air?.80:.84,
+        log:{act:air?'Outcomes within tolerance; threshold holds at 0.80':'ETA miss +22%; threshold tightened to 0.84',why:'Predicted vs actual compared for every autonomous and approved action.',src:'AIS · SAP TM proof of delivery'}}
+    ];
+  }
+},
+
+hormuz:{
+  name:'Strait of Hormuz closed',
+  norm:{maxTime:20,maxCost:250},timeUnit:'d',
+  intro:['Monitoring the corridor','Lot VX-2291 is heading for Suez on schedule. Gulf traffic through Jebel Ali and the Strait of Hormuz is moving normally.'],
+  viab:{lot:'VX-2291',win:12,eta:6,status:'ok'},
+  setup(ctx){ctx.vx=SIM.vx([22,34.6],{onArrive:()=>SIM.lastMile('mombasa')})},
+  options:[
+    {id:'watch',name:'Do nothing now; raise the watch level on Red Sea transits',time:6,cost:0,integ:.95,risk:.25,equity:.9,rev:'Reversible',route:'auto',why:'No lot exposed; watching costs nothing'},
+    {id:'lock',name:'Lock Arabian Sea freight rates for 30 days',time:6,cost:35,integ:.95,risk:.2,equity:.85,rev:'Irreversible (contract)',route:'optional',why:'Contract commitment; suggested to planner, no pause'},
+    {id:'cape',name:'Pre-emptively reroute 3 lots via the Cape',time:14,cost:210,integ:.3,risk:.1,equity:.4,rev:'Reversible',route:'blocked',why:'Arrives after the cold-chain window; no current threat on their lanes'}
+  ],
+  steps:[
+    {agent:'sense',t:0,pipe:{sense:'done'},title:'Strait of Hormuz closed to container traffic',
+      text:'Credibility 0.94 from naval advisories, carrier notices and AIS showing Gulf traffic stopping. Severity for our corridor: LOW. None of our 14 active lots passes through the Gulf.',
+      fx(){World.setZone('hormuz',true)},
+      log:{act:'Classified: Hormuz closure, severity LOW for our corridor',why:'0 of 14 active lots route through the Gulf.',src:'Naval advisory · carrier notices · AIS'}},
+    {agent:'plan',t:.3,pipe:{plan:'done'},showOptions:true,title:'Checks the second-order effects',
+      text:'No lot is exposed. Bunker fuel and Arabian Sea freight rates may rise about 12%. Rerouting three Red Sea lots via the Cape "just in case" would cost $210k and arrive after their cold-chain window.',
+      log:{act:'3 options scored; pre-emptive reroute blocked',why:'Viability Clock blocks the Cape option; no direct exposure.',src:'IBP · SAP TM lanes',rej:['Pre-emptive Cape reroute of 3 lots: $210k, arrives after the window, no current threat']}},
+    {agent:'red',t:.5,pipe:{red:'done'},title:'Red-Team: could this spread?',
+      text:'Threats to resume Red Sea attacks are linked to the Iran escalation. The Red-Team raises the watch level on Red Sea transits for 14 days and re-checks every 6 hours, so a second shock would be caught early.',
+      log:{act:'Linked risk: Red Sea watch level raised to AMBER for 14 days',why:'Correlated threat. No action on shipments yet.',src:'Security advisories · news wire'}},
+    {agent:'gate',t:.6,pipe:{gate:'done',inv:'skip',route:'skip',human:'skip'},title:'The system chooses to do nothing, on purpose',
+      text:'Raising a watch level is confident and fully undoable, so it runs. No shipment moves, no money is spent, and no Decision Card is needed. VX-2291 continues through Suez on schedule.',
+      gate:[{n:1,name:'Raise Red Sea watch level',conf:.93,rev:1,out:'auto'},{n:2,name:'Lock freight rates (suggested only)',conf:.62,rev:.2,out:'escalate'},{n:3,name:'Pre-emptive Cape reroute',conf:.9,rev:.6,out:'blocked'}],
+      log:{act:'No shipment action taken',why:'Doing nothing is the best option: zero exposure, and every alternative costs money or time.',src:'Gate policy v1'}},
+    {agent:'comp',t:.7,pipe:{comp:'done'},title:'Logs why it did not act',
+      text:'The audit log records the options it rejected and their cost, so a reviewer can see the system considered them. The rate-lock idea goes to the planner\'s inbox as a suggestion, without pausing anything.',
+      log:{act:'Recorded decision not to act',why:'Counterfactual entry keeps the "no" defensible.',src:'SAP Audit Log',rej:['Lock freight rates: contract commitment, suggested to planner only']}},
+    {agent:'trust',t:30,pipe:{trust:'done'},title:'No action, no drift',trust:.80,
+      text:'Nothing autonomous misfired, so the threshold holds at 0.80. VX-2291 reaches Mombasa on its normal route and trucks carry the doses on to the clinics.',
+      log:{act:'Threshold holds at 0.80',why:'No prediction errors to learn from.',src:'Outcome tracker'}}
+  ]
+},
+
+tariff:{
+  name:'Tariff spike to 50%',
+  norm:{maxTime:120,maxCost:1000},timeUnit:'d',
+  intro:['Monitoring supplier lanes','Syringes and cold boxes for the Kenya programme ship from Shanghai. A planner asks the system to run the brief\'s what-if: tariffs on this lane rise to 50%.'],
+  viab:{lot:'VX-2291',win:12,eta:6,status:'ok'},
+  setup(ctx){
+    ctx.vx=SIM.vx([12,37],{onArrive:()=>SIM.lastMile('mombasa')});
+    ctx.hl=World.highlight(PP.SHANGHAI_MOMBASA,'rgba(168,90,12,.75)',[6,4]);
+    World.addEnt({path:PP.SHANGHAI_MOMBASA,startAt:.12,speed:2,color:C.warn,size:13,label:'KIT-88 · syringes, cold boxes',labelColor:C.warn});
+    World.pin({lon:121.5,lat:31.2,color:C.warn,glyph:'%',text:'+50% duty (what-if)',dy:24});
+  },
+  options:[
+    {id:'absorb',name:'Keep supplier and absorb the duty',time:0,cost:900,integ:.95,risk:.3,equity:.45,rev:'Reversible',route:'human',why:'Budget impact above threshold; ~15% fewer doses funded',conf:.85},
+    {id:'dual',name:'Dual-source 40% from WHO-prequalified India supplier',time:56,cost:150,integ:.9,risk:.25,equity:.85,rev:'Partly',route:'human',why:'Sourcing change needs procurement approval',conf:.76},
+    {id:'buffer',name:'Pre-buy a 10-week buffer before the duty applies',time:30,cost:400,integ:.8,risk:.2,equity:.8,rev:'Partly',route:'human',why:'Spend above threshold; storage risk',conf:.7},
+    {id:'switch',name:'Switch fully to the India supplier',time:90,cost:100,integ:.8,risk:.45,equity:.8,rev:'Irreversible',route:'human',why:'Primary supplier switch; regret if duty is dropped',conf:.6}
+  ],
+  human:{ids:['dual','buffer','absorb','switch'],title:'Choose a sourcing response to the 50% what-if',
+    text:'The duty is proposed, not enacted, and court challenges are pending. The Red-Team puts its chance at 0.55. A non-binding request for quotation has already gone to the India supplier.',
+    protect:'Hold-and-protect: non-binding RFQ sent through SAP Ariba; nothing committed'},
+  steps:[
+    {agent:'sense',t:0,pipe:{sense:'done'},title:'What-if: duty on this lane rises to 50%',
+      text:'Source: an official gazette notice (credibility 0.99), status proposed, not enacted. Severity MEDIUM: a cost shock, not a time shock. It affects syringes and cold boxes for the Kenya programme shipped from Shanghai.',
+      log:{act:'Classified: tariff what-if, severity MEDIUM (cost)',why:'Official source, but proposed only. No delivery-time impact.',src:'Tariff announcement feed · gazette notice'}},
+    {agent:'plan',t:.3,pipe:{plan:'done'},showOptions:true,title:'Four sourcing strategies scored',
+      text:'Absorb the duty, dual-source 40% from India, pre-buy a 10-week buffer, or switch fully. Time here means days until the option takes effect. Raise the cost weight or the time weight and watch the ranking change.',
+      log:{act:'Scored 4 sourcing strategies',why:'Cost, lead time, integrity, exposure and equity weighed with the current priority weights.',src:'SAP Ariba supplier data · IBP cost model'}},
+    {agent:'red',t:.5,pipe:{red:'done'},title:'Red-Team: what if the tariff never happens?',
+      text:'The duty is only proposed and faces court challenges, so the Red-Team puts its chance at 0.55. A full switch to India would be costly regret if it is dropped, so its confidence falls to 0.60. Dual-sourcing keeps both doors open.',
+      log:{act:'Full-switch confidence lowered to 0.60',why:'Tariff probability 0.55; irreversible move on uncertain policy.',src:'Legal and policy news feed'}},
+    {agent:'comp',t:.6,pipe:{comp:'done'},title:'Rules of origin and supplier qualification',
+      text:'The India supplier is WHO-prequalified for auto-disable syringes. Rules-of-origin paperwork is ready. Neither lane has sanctions exposure.',
+      log:{act:'Both suppliers compliant',why:'WHO prequalification confirmed; origin documents complete.',src:'WHO PQ list · sanctions screen'}},
+    {agent:'gate',t:.7,pipe:{gate:'done'},title:'Only the non-binding step runs alone',
+      text:'Sending a non-binding request for quotation is confident and undoable, so it runs now. Every sourcing change moves money or suppliers, so it goes to the procurement lead.',
+      gate:[{n:1,name:'Send non-binding RFQ to India supplier',conf:.94,rev:.95,out:'auto'},{n:2,name:'Absorb duty',conf:.85,rev:.3,out:'escalate'},{n:3,name:'Dual-source 40%',conf:.76,rev:.55,out:'escalate'},{n:4,name:'Pre-buy 10-week buffer',conf:.7,rev:.6,out:'escalate'},{n:5,name:'Full switch',conf:.6,rev:.1,out:'escalate'}],
+      log:{act:'Gate: 1 autonomous, 4 escalated',why:'Only the RFQ is both confident and reversible.',src:'Gate policy v1 · threshold 0.80'}},
+    {agent:'inv',t:.8,pipe:{inv:'auto',route:'skip'},title:'RFQ sent (autonomous)',
+      text:'A request for quotation for 40% of annual syringe volume goes to the India supplier through SAP Ariba. No commitment; it can be withdrawn at any time.',
+      fx(){World.pin({lon:72.95,lat:18.95,color:C.ok,glyph:'?',text:'RFQ sent · non-binding',dy:-22})},
+      log:{act:'RFQ sent to India supplier',why:'Gathers real prices before a person decides. Zero commitment.',src:'SAP Ariba'}},
+    {agent:'human',t:.9,pipe:{human:'waiting'},human:true,title:'Waiting for the procurement lead',
+      text:'Every sourcing change is escalated. The Decision Card below ranks them with the current weights.'}
+  ],
+  post(ch){
+    const T={dual:'Dual-source approved: 40% of volume from India',buffer:'Buffer pre-buy approved before the duty applies',absorb:'Duty absorbed; supplier unchanged',switch:'Full switch to the India supplier approved'};
+    const TR={dual:['RFQ reply arrived in 3 days as predicted; the price was within 4% of forecast. The threshold eases to 0.79.',.79],buffer:['The buffer landed 2 days early; cost matched forecast. The threshold holds at 0.80.',.80],absorb:['Cost forecast matched exactly. The threshold holds at 0.80.',.80],switch:['Supplier qualification took 11 weeks against 8 predicted: +37%. The threshold tightens to 0.85.',.85]};
+    return [
+      {agent:'route',t:1.6,pipe:{route:'done'},title:T[ch],
+        text:ch==='absorb'?'The Shanghai lane continues unchanged. Finance is notified of the budget impact and the programme is flagged for extra funding.':ch==='buffer'?'An extra consignment of kit leaves Shanghai now so it lands before the duty takes effect. Cold-room space is reserved in Mombasa.':'A first India consignment leaves Nhava Sheva for Mombasa. The Shanghai lane '+(ch==='dual'?'keeps 60% of volume.':'is wound down after current orders.'),
+        fx(){if(ch==='dual'||ch==='switch'){World.addEnt({path:PP.NHAVA_MOMBASA,speed:2.2,color:C.ok,size:13,label:'KIT-IN · '+(ch==='dual'?'40%':'100%')+' volume',labelColor:C.ok})}
+          if(ch==='buffer'){World.addEnt({path:PP.SHANGHAI_MOMBASA,speed:2.4,color:C.warn,size:13,label:'KIT-88B · 10-week buffer',labelColor:C.warn})}},
+        log:{act:'Executed: '+T[ch],why:'Approved on the Decision Card by the procurement lead.',src:'SAP Ariba · SAP TM',rej:SCEN.tariff.options.filter(o=>o.id!==ch).map(o=>o.name+': '+o.why)}},
+      {agent:'comp',t:1.8,pipe:{comp:'done'},title:'Audit trail sealed',
+        text:'The decision, the tariff probability behind it, the approver and every rejected strategy are stored together, ready for finance and the donor.',
+        log:{act:'Audit report generated',why:'Includes the what-if assumptions and the approver.',src:'SAP Audit Log'}},
+      {agent:'trust',t:600,pipe:{trust:'done'},title:'Trust Calibration: did the predictions hold?',text:TR[ch][0],trust:TR[ch][1],
+        log:{act:'Threshold now '+TR[ch][1].toFixed(2),why:TR[ch][0],src:'Outcome tracker'}}
+    ];
+  }
+},
+
+spoof:{
+  name:'Spoofed port alert',
+  norm:{maxTime:5,maxCost:120},timeUnit:'d',
+  intro:['Monitoring the corridor','VX-2291 has passed the Horn of Africa and is two days from Mombasa. Port traffic looks normal.'],
+  viab:{lot:'VX-2291',win:5,eta:2,status:'ok'},
+  setup(ctx){ctx.vx=SIM.vx([51.8,12.2],{speed:.9,onArrive:()=>{ctx.vx.label='VX-2291 · berthed at Mombasa (port open)';SIM.lastMile('mombasa')}})},
+  options:[
+    {id:'verify',name:'Keep course; confirm with the Mombasa port agent',time:0,cost:.5,integ:.95,risk:.15,equity:.9,rev:'Reversible',route:'auto',why:'Signal quarantined; costs nothing to verify'},
+    {id:'divert',name:'Divert VX-2291 and 2 lots to Dar es Salaam',time:1.5,cost:96,integ:.85,risk:.8,equity:.5,rev:'Partly',route:'human',why:'Confidence 0.18: far below the 0.80 threshold',conf:.18}
+  ],
+  human:{ids:['verify','divert'],title:'Analyst check: is Mombasa port really closed?',
+    text:'One unverified post says the port is shut. The port authority, carriers and AIS all say it is open. The system has refused to act on its own. Do you agree?',
+    protect:'Hold-and-protect: VX-2291 keeps course; Dar es Salaam berth soft-held (free)'},
+  steps:[
+    {agent:'sense',t:0,pipe:{sense:'escalate'},title:'Alert: "Mombasa port closed, all berths shut"',
+      text:'One post from an account created 2 days ago, reposted twice. No port authority notice and no carrier notice. AIS shows 11 vessels berthing or moving in Mombasa in the last 2 hours. Credibility 0.18, so the Sensing Agent escalates it as ambiguous.',
+      fx(){World.pin({lon:39.66,lat:-4.05,color:C.warn,glyph:'?',text:'Unverified: "port closed"',dy:-24})},
+      viab:{status:'risk',note:'Unverified threat'},
+      log:{act:'Ambiguous signal escalated to analyst',why:'Single source, credibility 0.18, contradicted by AIS and port notices.',src:'Social feed · AIS · port authority notices'}},
+    {agent:'red',t:.2,pipe:{red:'done'},title:'Red-Team flags a likely spoof',
+      text:'A new account, no corroboration and timing that matches VX-2291\'s arrival window: the pattern matches known disinformation. The signal is quarantined and cannot trigger any action on its own.',
+      log:{act:'Signal quarantined as probable spoof',why:'New account, zero corroboration, contradicts vessel data, suspicious timing.',src:'Credibility model · AIS'}},
+    {agent:'plan',t:.3,pipe:{plan:'done'},showOptions:true,title:'What would acting on it cost?',
+      text:'Diverting VX-2291 and two other lots to Dar es Salaam would add 1.5 days, $96k and customs clearance at a new port, all for a signal that is probably false.',
+      log:{act:'2 options scored',why:'Diversion is costly and only partly reversible.',src:'SAP TM · port tariffs'}},
+    {agent:'gate',t:.4,pipe:{gate:'done',inv:'skip',route:'skip'},title:'Low confidence: the system refuses to act alone',
+      text:'The diversion scores 0.18 confidence, far under the 0.80 threshold, so the gate blocks it and hands the signal to a human analyst. VX-2291 keeps its course.',
+      gate:[{n:1,name:'Quarantine + verify with port agent',conf:.97,rev:1,out:'auto'},{n:2,name:'Divert lots to Dar es Salaam',conf:.18,rev:.5,out:'escalate'}],
+      log:{act:'Autonomous diversion refused',why:'Confidence 0.18 < 0.80. A single low-credibility source can never cross the threshold.',src:'Gate policy v1'}},
+    {agent:'human',t:.5,pipe:{human:'waiting'},human:true,title:'Waiting for the analyst',
+      text:'The analyst sees the evidence for and against. The Decision Card below recommends keeping course.'}
+  ],
+  post(ch){
+    const ok=ch==='verify';
+    return [
+      {agent:'route',t:.8,pipe:{route:ok?'skip':'done'},title:ok?'Signal dismissed: VX-2291 keeps course':'Analyst override: diverting to Dar es Salaam',
+        text:ok?'The port agent confirms Mombasa is open. VX-2291 berths on schedule and trucks carry the doses to Nairobi and the clinics.':'VX-2291 turns for Dar es Salaam as instructed. Compliance logs that the override went against the evidence, so it can be reviewed later.',
+        fx(ctx){World.clearPins();if(ok){World.pin({lon:39.66,lat:-4.05,color:'#6E7C8D',glyph:'✕',text:'Quarantined · false alert',dy:-24})}else{ctx.vx.onArrive=null;SIM.redirect(ctx.vx,[[41.3,-5.6],[40.1,-6.6],[39.35,-6.8]],'VX-2291 · diverted to Dar es Salaam');ctx.vx.onArrive=()=>SIM.truck('DAR_NAIROBI',null,()=>SIM.lastMile('nairobi'))}},
+        viab:ok?{status:'ok',note:'Port confirmed open'}:{eta:3.5,status:'risk',note:'Diversion adds 1.5 d'},
+        log:{act:ok?'Human dismissed signal as false':'Human override: diverted to Dar es Salaam',why:ok?'Port agent confirmed normal operations.':'Analyst chose caution against the evidence; flagged for review.',src:'Port agent confirmation · Decision Card',rej:[ok?'Divert to Dar es Salaam: $96k for a probably false signal':'Keep course: analyst did not accept the port agent reply in time']}},
+      {agent:'comp',t:1,pipe:{comp:'done'},title:'Logs the refusal and the decision',
+        text:'No autonomous action was taken. The log holds the signal, its credibility score, the evidence against it and who made the final call.',
+        log:{act:'Audit entry sealed',why:'Shows the guardrail worked: no action on a single low-credibility source.',src:'SAP Audit Log'}},
+      {agent:'trust',t:30,pipe:{trust:'done'},trust:.80,title:'Trust Calibration learns from the spoof',
+        text:'Credibility for the posting account drops to 0.02 and posts matching this pattern are quarantined automatically. The threshold holds at 0.80 because no autonomous action misfired.',
+        log:{act:'Source blocklisted; threshold holds at 0.80',why:'Guardrail behaved as designed.',src:'Credibility model'}}
+    ];
+  }
+}
+};
+
+/* ================= ENGINE ================= */
+const S={id:'redsea',steps:[],i:-1,playing:true,speed:1,timer:null,waiting:false,choice:null,threshold:.80,gate:[],log:[],pipe:{},viab:null,ctx:{},optionsShown:false};
+const reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function weights(){return{time:+$('w-time').value,cost:+$('w-cost').value,integ:+$('w-integ').value,risk:+$('w-risk').value,equity:+$('w-equity').value}}
+function score(o,sc){
+  if(o.route==='blocked')return null;const w=weights(),n=sc.norm;const tot=w.time+w.cost+w.integ+w.risk+w.equity||1;
+  const v=w.time*(1-Math.min(1,o.time/n.maxTime))+w.cost*(1-Math.min(1,o.cost/n.maxCost))+w.integ*o.integ+w.risk*(1-o.risk)+w.equity*o.equity;
+  return Math.round(v/tot*100);
+}
+function fmtCost(k){return k>=1000?'$'+(k/1000).toFixed(1)+'M':k>=1?'$'+Math.round(k)+'k':k===0?'$0':'$'+Math.round(k*1000)}
+function fmtTime(o,sc){if(sc.id==='tariff')return o.time===0?'now':o.time+' d';return o.time+' d'}
+function clockText(h){const base=6+h;const d=Math.floor(base/24),hh=Math.floor(base%24),mm=Math.round((base%1)*60)%60;return 'D+'+d+' · '+String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0')}
+
+function renderPipe(){
+  $('pipe').innerHTML=AGENTS.map((a,k)=>{const st=S.pipe[a.id]||'idle';const cur=S.i>=0&&S.steps[S.i]&&S.steps[S.i].agent===a.id;
+    return `<li class="${cur?'active':''} ${['done','auto'].includes(st)?'done':''}"><span class="n">${a.id==='human'?'H':a.id==='gate'?'◆':k+1-(k>4?1:0)-(k>7?1:0)}</span><span class="nm">${esc(a.name)}${a.isNew?'<span class="new-tag">NEW</span>':''}<small>${esc(a.sub)}</small></span><span class="st ${st}">${ST_LABEL[st]}</span></li>`}).join('');
+}
+function renderNow(agent,title,text){
+  const a=AG[agent];$('now-who').innerHTML=`<span class="agent-chip ${a.chip}">${esc(a.label)}</span>`;$('now-title').textContent=title;$('now-text').textContent=text;
+}
+function renderViab(){
+  const v=S.viab;const circ=2*Math.PI*50,max=Math.max(14,v.win);
+  const left=Math.max(0,v.win);$('v-days').textContent=left.toFixed(1);
+  $('v-arc').setAttribute('stroke-dasharray',`${circ*left/max} ${circ}`);
+  $('v-arc').setAttribute('stroke',v.status==='bad'?C.bad:v.status==='risk'?C.warn:C.ok);
+  $('v-eta').setAttribute('stroke-dasharray',v.eta==null?`0 ${circ}`:`${circ*Math.min(v.eta,max)/max} ${circ}`);
+  $('v-win').textContent=left.toFixed(1)+' days · '+v.lot;
+  $('v-plan').textContent=v.eta==null?'Blocked (no route)':v.eta.toFixed(1)+' days';
+  const tag=v.status==='bad'?'<span class="tag bad">'+esc(v.note||'At risk')+'</span>':v.status==='risk'?'<span class="tag warn">'+esc(v.note||'Watch')+'</span>':'<span class="tag ok">'+esc(v.note||'Inside window')+'</span>';
+  $('v-status').innerHTML=tag;
+}
+function renderOptions(){
+  const sc=SCEN[S.id];if(!S.optionsShown){$('opt-area').innerHTML='<p class="empty">Options appear here once the Scenario Planning Agent runs.</p>';$('opt-sub').textContent='WHAT-IF OPTIONS';return}
+  const rows=sc.options.map(o=>({o,s:score(o,sc)}));
+  const humanIds=(sc.human&&sc.human.ids)||[];const best=rows.filter(r=>r.s!=null&&humanIds.includes(r.o.id)).sort((a,b)=>b.s-a.s)[0];
+  $('opt-sub').textContent=sc.options.length+' OPTIONS · LIVE SCORE';
+  const rt={auto:'<span class="tag ok">Runs alone</span>',human:'<span class="tag warn">To human</span>',blocked:'<span class="tag bad">Blocked</span>',optional:'<span class="tag nav">Suggest only</span>'};
+  $('opt-area').innerHTML=`<div class="tbl-wrap"><table class="optt"><thead><tr><th>Option</th><th class="num">${sc.id==='tariff'?'Takes effect':'Time'}</th><th class="num">Cost</th><th class="num">Score</th><th>Route</th></tr></thead><tbody>${rows.map(r=>`<tr class="${r.s==null?'blocked':''} ${best&&r.o.id===best.o.id?'best':''}"><td>${esc(r.o.name)}<div style="color:var(--ink-3);font-size:11.5px;margin-top:2px">${esc(r.o.why)}</div></td><td class="num">${fmtTime(r.o,sc)}</td><td class="num">${fmtCost(r.o.cost)}</td><td class="num">${r.s==null?'—':r.s}${r.s==null?'':`<div class="bar"><i style="width:${r.s}%"></i></div>`}</td><td>${rt[r.o.route]}</td></tr>`).join('')}</tbody></table></div>`;
+}
+function gateXY(p){const thr=S.threshold;const y=p.conf>=thr?.5+(p.conf-thr)/(1-thr)*.5:p.conf/thr*.5;return{x:6+p.rev*88,y:6+(1-y)*88}}
+function renderGate(){
+  const col={auto:C.ok,escalate:C.warn,blocked:C.bad,rejected:'#9AA6B2'};const lbl={auto:'Autonomous',escalate:'To human',blocked:'Blocked',rejected:'Rejected'};const cls={auto:'ok',escalate:'warn',blocked:'bad',rejected:'nav'};
+  const gm=$('gm');gm.querySelectorAll('.pt').forEach(n=>n.remove());
+  S.gate.forEach(p=>{const {x,y}=gateXY(p);const d=document.createElement('span');d.className='pt';d.style.left=x+'%';d.style.top=y+'%';d.style.background=col[p.out];d.textContent=p.n;d.title=p.name;gm.appendChild(d)});
+  $('gate-list').innerHTML=S.gate.length?S.gate.map(p=>`<li><span class="k" style="background:${col[p.out]}">${p.n}</span><span>${esc(p.name)} <span class="mono" style="color:var(--ink-3);font-size:11px">c=${p.conf.toFixed(2)}</span></span><span class="tag ${cls[p.out]}">${lbl[p.out]}</span></li>`).join(''):'<li style="display:block;color:var(--ink-3)">Actions are plotted here when the gate runs.</li>';
+}
+function renderTrust(){
+  const t=S.threshold;$('t-knob').style.left=((t-.7)/.2*100)+'%';$('t-val').textContent='threshold '+t.toFixed(2);
+}
+function renderLog(){
+  $('log-count').textContent=S.log.length+(S.log.length===1?' ENTRY':' ENTRIES');
+  $('log').innerHTML=S.log.slice().reverse().map(e=>{const a=AG[e.agent];return `<li><div class="lh"><span class="agent-chip ${a.chip}">${esc(a.label)}</span><span class="ts">${esc(e.ts)}</span></div><div class="act">${esc(e.act)}</div><div class="why">${esc(e.why||'')}</div>${e.src?`<div class="src">Sources: ${esc(e.src)}</div>`:''}${e.rej&&e.rej.length?`<details><summary>Rejected alternatives (${e.rej.length})</summary><ul>${e.rej.map(r=>`<li>${esc(r)}</li>`).join('')}</ul></details>`:''}</li>`}).join('')||'<li style="background:none;border:0;color:var(--ink-3)">Every decision lands here with its reasons, sources and the options rejected.</li>';
+}
+function renderDecision(){
+  const sc=SCEN[S.id];if(!S.waiting||!sc.human){$('decision').hidden=true;return}
+  $('decision').hidden=false;$('dc-title').textContent=sc.human.title;$('dc-text').textContent=sc.human.text;$('dc-protect-text').textContent=sc.human.protect;
+  const opts=sc.human.ids.map(id=>sc.options.find(o=>o.id===id)).map(o=>({o,s:score(o,sc)}));const best=opts.slice().sort((a,b)=>b.s-a.s)[0];
+  $('dc-opts').innerHTML=opts.map(({o,s})=>`<div class="opt ${o.id===best.o.id?'rec':''}"><h5><span>${esc(o.name)}</span>${o.id===best.o.id?'<span class="rec-tag">Recommended</span>':''}</h5><dl><dt>${sc.id==='tariff'?'Takes effect':'Time'}</dt><dd>${fmtTime(o,sc)}</dd><dt>Cost</dt><dd>${fmtCost(o.cost)}</dd><dt>Product integrity</dt><dd>${Math.round(o.integ*100)}%</dd><dt>Reversible</dt><dd>${esc(o.rev)}</dd><dt>Confidence</dt><dd>${(o.conf||.9).toFixed(2)}</dd><dt>Weighted score</dt><dd>${s}</dd></dl><p>${esc(o.why)}</p><button class="btn ${o.id===best.o.id?'primary':''}" type="button" data-choose="${o.id}">Approve this option</button></div>`).join('');
+  $('dc-opts').querySelectorAll('[data-choose]').forEach(b=>b.addEventListener('click',()=>choose(b.dataset.choose)));
+}
+function renderHud(){
+  $('clock').textContent=clockText(S.hours||0);$('hud-scen').textContent=SCEN[S.id].name;
+  $('hud-step').innerHTML='Step <b>'+Math.max(0,S.i+1)+' / '+S.steps.length+(S.choice?'':((SCEN[S.id].post)?'+':''))+'</b>';
+  $('btn-play').textContent=S.playing?'Pause':(S.i>=S.steps.length-1&&!S.waiting&&S.i>=0?'Replay':'Play');
+  $('btn-next').disabled=S.waiting||(S.i>=S.steps.length-1&&!S.waiting&&S.i>=0);
+}
+function renderAll(){renderPipe();renderViab();renderOptions();renderGate();renderTrust();renderLog();renderDecision();renderHud()}
+
+function addLog(agent,l){if(!l)return;S.log.push({agent,ts:clockText(S.hours||0),act:l.act,why:l.why,src:l.src,rej:l.rej})}
+
+function runStep(i){
+  const st=S.steps[i];if(!st)return;S.i=i;S.hours=st.t;
+  Object.assign(S.pipe,st.pipe||{});
+  if(st.gate)S.gate=st.gate;if(st.showOptions)S.optionsShown=true;
+  if(st.viab)Object.assign(S.viab,st.viab);
+  const elapsed=st.t/24;S.viab.winNow=S.viab.win;
+  if(st.trust!=null)S.threshold=st.trust;
+  if(st.fx)st.fx(S.ctx);
+  addLog(st.agent,st.log);
+  renderNow(st.agent,st.title,st.text);
+  if(st.human){S.waiting=true;S.playing=false;renderAll();if(!reduce)setTimeout(()=>$('decision').scrollIntoView({behavior:'smooth',block:'nearest'}),350);return}
+  if(i===S.steps.length-1){S.playing=false;renderAll();setTimeout(()=>renderNow(st.agent,st.title,st.text+'  Run complete: pick another disruption or press Replay.'),0);return}
+  renderAll();schedule();
+}
+function schedule(){clearTimeout(S.timer);if(!S.playing||S.waiting)return;S.timer=setTimeout(()=>runStep(S.i+1),4600/S.speed)}
+
+function choose(id){
+  const sc=SCEN[S.id];if(!S.waiting)return;S.waiting=false;S.choice=id;
+  const o=sc.options.find(x=>x.id===id);S.pipe.human='done';
+  addLog('human',{act:'Approved: '+o.name,why:'Decision Card, weighted score '+score(o,sc)+'. Weights: '+Object.entries(weights()).map(([k,v])=>k+' '+v).join(', ')+'.',src:'Decision Card (SAP Build Process Automation)'});
+  S.steps=S.steps.concat(sc.post(id));S.playing=true;renderAll();
+  $('sim').scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});
+  S.timer=setTimeout(()=>runStep(S.i+1),900);
+}
+
+function load(id,autoplay){
+  clearTimeout(S.timer);const sc=SCEN[id];sc.id=id;
+  Object.assign(S,{id,steps:sc.steps.slice(),i:-1,waiting:false,choice:null,threshold:.80,gate:[],log:[],pipe:{},viab:Object.assign({},sc.viab),ctx:{},optionsShown:false,hours:0,playing:!!autoplay});
+  World.reset();World.setPaused(false);sc.setup(S.ctx);$('dc-more').textContent='Ask the agents for more options';
+  document.querySelectorAll('.scen button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.s===id?'true':'false'));
+  renderNow('sense',sc.intro[0],sc.intro[1]);renderAll();
+  if(autoplay)S.timer=setTimeout(()=>runStep(0),2600/S.speed);
+}
+
+/* ================= CONTROLS ================= */
+document.querySelectorAll('.scen button').forEach(b=>b.addEventListener('click',()=>load(b.dataset.s,true)));
+$('btn-play').addEventListener('click',()=>{
+  if(S.waiting){$('decision').scrollIntoView({behavior:'smooth',block:'nearest'});return}
+  if(S.i>=S.steps.length-1&&S.i>=0){load(S.id,true);return}
+  S.playing=!S.playing;World.setPaused(!S.playing&&S.i<0?false:!S.playing);
+  if(S.playing){if(S.i<0){clearTimeout(S.timer);S.timer=setTimeout(()=>runStep(0),600)}else schedule()}else clearTimeout(S.timer);
+  renderHud();
+});
+$('btn-next').addEventListener('click',()=>{if(S.waiting)return;clearTimeout(S.timer);World.setPaused(false);runStep(S.i+1)});
+$('btn-reset').addEventListener('click',()=>load(S.id,true));
+document.querySelectorAll('.speed button').forEach(b=>b.addEventListener('click',()=>{S.speed=+b.dataset.v;World.setSpeed(S.speed);document.querySelectorAll('.speed button').forEach(x=>x.setAttribute('aria-pressed',x===b?'true':'false'));if(S.playing)schedule()}));
+['time','cost','integ','risk','equity'].forEach(k=>$('w-'+k).addEventListener('input',()=>{$('o-'+k).textContent=$('w-'+k).value;renderOptions();renderDecision()}));
+$('dc-more').addEventListener('click',()=>{addLog('plan',{act:'Human asked for more options',why:'Re-ran 12 variants (split lots, mixed modes). None beats the shown options inside the cold-chain window and cost limits.',src:'Scenario Planning Agent'});renderLog();$('dc-more').textContent='Agents re-ran 12 variants: see the log';});
+
+load('redsea',!reduce);
+</script>
